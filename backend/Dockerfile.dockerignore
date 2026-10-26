@@ -1,0 +1,11 @@
+.git
+.local
+**/node_modules
+**/dist
+**/.env
+**/.env.*
+**/*.log
+test-results
+playwright-report
+backend/test
+e2e

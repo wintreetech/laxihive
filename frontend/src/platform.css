@@ -1,0 +1,336 @@
+/* Shared platform layouts; keep the original visual palette. */
+.sidebar {
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.sidebar > * {
+  flex-shrink: 0;
+}
+.sidebar nav a,
+.sidebar-logout {
+  font-size: 15px;
+  line-height: 1.5;
+}
+.sidebar-logout {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  width: 100%;
+  color: var(--muted);
+  text-align: left;
+  border-radius: 9px;
+}
+.sidebar-logout:hover {
+  color: var(--text);
+  background: var(--elevated);
+}
+.sidebar-bottom {
+  padding-top: 24px;
+}
+.admin-workspace {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.admin-navigation {
+  position: sticky;
+  top: 100px;
+  max-height: calc(100dvh - 120px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.admin-navigation button {
+  padding: 10px 12px;
+  text-align: left;
+  border-radius: 7px;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.admin-navigation button:hover,
+.admin-navigation button.active {
+  color: var(--text);
+  background: #2a2542;
+}
+.admin-content {
+  min-width: 0;
+  display: grid;
+  gap: 22px;
+}
+.admin-content .panel {
+  min-width: 0;
+  padding: 24px;
+  display: grid;
+  gap: 16px;
+}
+.admin-content table {
+  font-size: 14px;
+}
+.admin-content th {
+  font-size: 13px;
+}
+.admin-content td {
+  vertical-align: top;
+  max-width: 320px;
+  overflow-wrap: normal;
+}
+.admin-content td small {
+  display: block;
+  color: var(--muted);
+}
+.admin-content pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 300px;
+  overflow: auto;
+  font-size: 13px;
+}
+.admin-content details {
+  padding: 10px 0;
+}
+.admin-content h2 {
+  font-size: 24px;
+}
+.admin-content p,
+.admin-form label {
+  font-size: 15px;
+  line-height: 1.6;
+}
+.admin-form {
+  width: min(100%, 620px);
+  gap: 16px;
+}
+.admin-form input,
+.admin-form select,
+.admin-filters input,
+.admin-filters select,
+.admin-content > .panel > label input {
+  width: 100%;
+  min-height: 44px;
+  font-size: 16px;
+  background: var(--bg);
+  color: var(--text);
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.admin-form .checkbox-label input {
+  width: 18px;
+  min-height: auto;
+}
+.admin-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.admin-filters label {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+.admin-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+}
+.admin-metrics .panel {
+  padding: 18px;
+}
+.admin-metrics span {
+  color: var(--muted);
+  font-size: 14px;
+}
+.admin-metrics strong {
+  font-size: 29px;
+  line-height: 1.2;
+}
+.pricing-mode {
+  display: grid;
+  gap: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.pricing-mode h3 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.play-area {
+  position: relative;
+  min-width: 0;
+}
+.session-gate {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  padding: clamp(18px, 4vw, 40px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  background: #111824f7;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow-y: auto;
+}
+.session-gate h2 {
+  font-size: 28px;
+}
+.session-gate .button-row {
+  flex-wrap: wrap;
+}
+.access-explainer {
+  padding: 20px 24px;
+  margin: 22px 0;
+  display: grid;
+  gap: 10px;
+}
+.access-explainer > span {
+  color: var(--muted);
+}
+.access-explainer p,
+.game-side p,
+.game-intro p {
+  font-size: 16px;
+  line-height: 1.65;
+}
+.game-intro .button + .button {
+  margin-top: 12px;
+}
+.game-card .access-label {
+  display: block;
+  font-size: 13px;
+  color: var(--lime);
+  margin: 12px 0 0;
+  line-height: 1.5;
+}
+.onboarding-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  padding: 20px;
+  margin: 20px 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.onboarding-strip span {
+  flex: 1 1 180px;
+  color: var(--muted);
+}
+.onboarding-strip strong {
+  color: var(--text);
+  display: block;
+}
+.coin-value {
+  padding: 14px 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+.table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.wallet-stats {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+.game-card-body > p {
+  font-size: 14px;
+  line-height: 1.6;
+}
+.card-bottom > span {
+  font-size: 12px;
+}
+.page-title p {
+  font-size: 16px;
+  line-height: 1.6;
+}
+.stat-card > span {
+  font-size: 14px;
+}
+.stat-card p {
+  font-size: 13px;
+  line-height: 1.5;
+}
+.table-wrap table {
+  font-size: 14px;
+}
+.table-wrap th {
+  font-size: 13px;
+}
+.form label {
+  font-size: 14px;
+}
+.form input,
+.form select {
+  font-size: 16px;
+}
+.button {
+  font-size: 14px;
+  min-height: 40px;
+}
+dialog {
+  max-width: calc(100vw - 28px);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+@media (max-width: 1200px) {
+  .admin-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .admin-navigation {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    max-height: 240px;
+  }
+}
+@media (max-width: 600px) {
+  .admin-content .panel {
+    padding: 16px;
+  }
+  .admin-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .admin-metrics strong {
+    font-size: 24px;
+  }
+  .access-explainer {
+    padding: 18px;
+  }
+  .session-gate {
+    justify-content: flex-start;
+  }
+  .session-gate .button {
+    white-space: normal;
+    text-align: center;
+  }
+  .sidebar-logout {
+    padding: 12px 16px;
+  }
+}
+@media (max-height: 650px) {
+  .sidebar-brand {
+    padding-bottom: 20px;
+  }
+  .sidebar-promo {
+    display: none;
+  }
+}

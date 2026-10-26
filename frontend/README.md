@@ -1,16 +1,27 @@
-# React + Vite
+﻿# Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React/Vite customer and administrator application. From this folder:
 
-Currently, two official plugins are available:
+```powershell
+npm.cmd install
+npm.cmd run dev
+```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Open http://localhost:5174 and run the backend in a separate terminal. The launcher reuses an existing healthy LexiHive frontend instead of crashing on a second start. An unrelated service occupying the configured port produces an actionable error; the launcher never silently changes ports.
 
-## React Compiler
+- `src/pages/`: application screens and routes.
+- `src/components/`: reusable interface components.
+- `src/lib/`: API client, authentication and checkout helpers.
+- `public/`: static assets.
+- `e2e/`: browser tests.
+- `scripts/`: development, deployment and browser-test helpers.
+- `vite.config.js`: reads the frontend URL/API port from `../backend/.env` for development.
+- `.env`: public `VITE_` settings only; keep `VITE_API_URL=/api`.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Game rules are imported from `../backend/shared`; keep both folders together when building. Backend secrets are read only by Node-based development configuration and never exposed as VITE_ variables.
 
-## Expanding the ESLint configuration
+Commands: `npm.cmd run typecheck`, `npm.cmd run lint`, `npm.cmd run build`, `npm.cmd run preview`, `npm.cmd run test:e2e`. The browser suite uses the backend's separate local fixture database on ports 4011/5185 and needs backend dependencies installed.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Netlify configuration lives in `netlify.toml`. Select frontend as the build base and ensure backend/shared remains available in the repository checkout. Set API_PROXY_TARGET to the public HTTPS API origin so deployment uses same-origin API requests and cookies. Build output is `dist`.
+
+See [running both apps](../README.md) and [adding features](../backend/docs/STRUCTURE.md).

@@ -1,0 +1,283 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "mongodb"
+  url = env("DATABASE_URL")
+}
+model User {
+  id String @id @default(cuid()) @map("_id")
+  email String @unique
+  passwordHash String
+  displayName String
+  role String @default("USER")
+  status String @default("ACTIVE")
+  verifiedAt DateTime?
+  createdAt DateTime @default(now())
+  sessions Session[]
+  tokens AuthToken[]
+  profile UserProfile?
+  wallet Wallet?
+  gameSessions GameSession[]
+  progress UserGameProgress[]
+  achievements UserAchievement[]
+  quotes CoinQuote[]
+  payments Payment[]
+  entitlements UserEntitlement[]
+  audits AdminAuditLog[]
+  @@index([createdAt])
+}
+model Session {
+  id String @id @map("_id")
+  userId String
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  csrf String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  @@index([userId])
+  @@index([expiresAt])
+}
+model AuthToken {
+  id String @id @map("_id")
+  userId String
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  kind String
+  expiresAt DateTime
+  @@index([userId,kind])
+}
+model UserProfile {
+  userId String @id @map("_id")
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  avatar String @default("violet")
+  isPublic Boolean @default(false)
+  xp Int @default(0)
+  streak Int @default(0)
+  longestStreak Int @default(0)
+  lastPlayDate DateTime?
+  playSeconds Int @default(0)
+}
+model Game {
+  slug String @id @map("_id")
+  name String
+  category String
+  visible Boolean @default(true)
+  sessions GameSession[]
+  progress UserGameProgress[]
+  unlock GameUnlock?
+  challenges DailyChallenge[]
+}
+model GameSession {
+  id String @id @default(cuid()) @map("_id")
+  userId String
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  gameSlug String
+  game Game @relation(fields:[gameSlug], references:[slug])
+  seed Int
+  difficulty String
+  level Int @default(1)
+  startedAt DateTime @default(now())
+  completedAt DateTime?
+  outcome String?
+  duration Int @default(0)
+  ranked Boolean @default(true)
+  billingState String @default("LEGACY")
+  accessType String @default("FREE_FULL")
+  coinPrice Int @default(0)
+  pricingVersion Int @default(0)
+  trialSeconds Int @default(0)
+  sessionSeconds Int @default(600)
+  readyAt DateTime?
+  trialStartedAt DateTime?
+  trialExpiresAt DateTime?
+  authorizedAt DateTime?
+  expiresAt DateTime?
+  score GameScore?
+  @@index([userId,startedAt])
+  @@index([gameSlug,completedAt])
+  @@index([userId,billingState,startedAt])
+}
+model GameAccessConfig {
+  id String @id @map("_id")
+  gameSlug String
+  mode String
+  accessType String @default("FREE_FULL")
+  coinPrice Int @default(0)
+  trialSeconds Int @default(30)
+  sessionSeconds Int @default(600)
+  active Boolean @default(true)
+  version Int @default(1)
+  draft Json?
+  publishedAt DateTime?
+  updatedAt DateTime @updatedAt
+  @@unique([gameSlug,mode])
+}
+model TrialGrant {
+  id String @id @map("_id")
+  sessionId String
+  createdAt DateTime @default(now())
+}
+model SiteSettings {
+  id String @id @default("global") @map("_id")
+  supportEmail String @default("")
+  supportReplyAim Boolean @default(false)
+  revision Int @default(0)
+}
+model GameScore {
+  sessionId String @id @map("_id")
+  session GameSession @relation(fields:[sessionId], references:[id], onDelete:Cascade)
+  score Int
+  xp Int
+  @@index([score])
+}
+model UserGameProgress {
+  id String @id @default(cuid()) @map("_id")
+  userId String
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  gameSlug String
+  game Game @relation(fields:[gameSlug], references:[slug])
+  bestScore Int @default(0)
+  wins Int @default(0)
+  stars Int @default(0)
+  campaign Json @default("{}")
+  lastPlayedAt DateTime @default(now())
+  @@unique([userId,gameSlug])
+}
+model DailyChallenge {
+  id String @id @default(cuid()) @map("_id")
+  date String @unique
+  seed Int
+  gameSlug String
+  game Game @relation(fields:[gameSlug], references:[slug])
+}
+model Achievement {
+  slug String @id @map("_id")
+  name String
+  description String
+  users UserAchievement[]
+}
+model UserAchievement {
+  id String @id @default(cuid()) @map("_id")
+  userId String
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  achievementSlug String
+  achievement Achievement @relation(fields:[achievementSlug], references:[slug])
+  earnedAt DateTime @default(now())
+  @@unique([userId,achievementSlug])
+}
+model Wallet {
+  id String @id @default(cuid()) @map("_id")
+  userId String @unique
+  user User @relation(fields:[userId], references:[id], onDelete:Restrict)
+  balance Int @default(0)
+  debt Int @default(0)
+  transactions WalletTransaction[]
+}
+model WalletTransaction {
+  id String @id @default(cuid()) @map("_id")
+  walletId String
+  wallet Wallet @relation(fields:[walletId], references:[id])
+  amount Int
+  balanceAfter Int
+  debtAfter Int @default(0)
+  kind String
+  reference String @unique
+  description String
+  createdAt DateTime @default(now())
+  @@index([walletId,createdAt])
+}
+model CoinPricingConfig {
+  id String @id @default("global") @map("_id")
+  minCents Int @default(500)
+  maxCents Int @default(50000)
+  stepCents Int @default(500)
+  coinsPerDollar Int @default(0)
+  coinsPerEuro Int @default(0)
+  enabled Boolean @default(false)
+  version Int @default(1)
+  updatedAt DateTime @updatedAt
+}
+model CoinQuote {
+  id String @id @default(cuid()) @map("_id")
+  userId String
+  user User @relation(fields:[userId], references:[id])
+  cents Int
+  currency String @default("usd")
+  coins Int
+  pricingVersion Int
+  expiresAt DateTime
+  payment Payment?
+}
+model Payment {
+  id String @id @default(cuid()) @map("_id")
+  provider String @default("stripe")
+  userId String
+  user User @relation(fields:[userId], references:[id])
+  quoteId String @unique
+  quote CoinQuote @relation(fields:[quoteId], references:[id])
+  checkoutId String?
+  intentId String?
+  cents Int
+  coins Int
+  currency String @default("usd")
+  status String @default("pending")
+  credited Boolean @default(false)
+  reversedCoins Int @default(0)
+  refundedCents Int @default(0)
+  disputeCents Int @default(0)
+  disputeEventCreated Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  gatewayStatus String?
+  gatewayVerifiedAt DateTime?
+  notifications GatewayNotification[]
+  purchase Purchase?
+  @@index([userId,createdAt])
+}
+model GatewayNotification {
+  id String @id @map("_id")
+  paymentId String
+  payment Payment @relation(fields:[paymentId], references:[id])
+  signedFields Json
+  processedAt DateTime?
+  createdAt DateTime @default(now())
+  @@index([paymentId,createdAt])
+}
+model Purchase {
+  id String @id @default(cuid()) @map("_id")
+  paymentId String @unique
+  payment Payment @relation(fields:[paymentId], references:[id])
+  createdAt DateTime @default(now())
+}
+model StripeEvent {
+  id String @id @map("_id")
+  type String
+  createdAt DateTime @default(now())
+}
+model GameUnlock {
+  id String @id @default(cuid()) @map("_id")
+  gameSlug String @unique
+  game Game @relation(fields:[gameSlug], references:[slug])
+  name String
+  price Int @default(500)
+  active Boolean @default(true)
+  entitlements UserEntitlement[]
+}
+model UserEntitlement {
+  id String @id @default(cuid()) @map("_id")
+  userId String
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  unlockId String
+  unlock GameUnlock @relation(fields:[unlockId], references:[id])
+  createdAt DateTime @default(now())
+  @@unique([userId,unlockId])
+}
+model AdminAuditLog {
+  id String @id @default(cuid()) @map("_id")
+  actorId String
+  actor User @relation(fields:[actorId], references:[id])
+  action String
+  detail Json
+  createdAt DateTime @default(now())
+  @@index([createdAt])
+}
+
