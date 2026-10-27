@@ -1,4 +1,52 @@
 /* Shared platform layouts; keep the original visual palette. */
+.theme-toggle {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--violet);
+}
+.theme-toggle:hover {
+  color: var(--violet);
+  background: var(--elevated);
+}
+@media (min-width: 761px) and (max-width: 1000px) {
+  .topbar-section {
+    display: none;
+  }
+  .topbar-left {
+    min-width: 0;
+  }
+}
+@media (max-width: 480px) {
+  .topbar {
+    padding-inline: 12px;
+    gap: 8px;
+  }
+  .topbar-left {
+    gap: 5px;
+  }
+  .topbar-actions {
+    gap: 4px;
+  }
+  .topbar .mobile-logo {
+    font-size: 19px;
+  }
+  .topbar .theme-toggle {
+    width: 30px;
+    height: 32px;
+  }
+  .topbar .wallet-plus {
+    display: none;
+  }
+}
+@media (max-width: 360px) {
+  .topbar .wallet-pill > span {
+    display: none;
+  }
+  .topbar .wallet-pill {
+    padding: 7px;
+    gap: 0;
+  }
+}
 .app-layout {
   --sidebar-width: 260px;
 }

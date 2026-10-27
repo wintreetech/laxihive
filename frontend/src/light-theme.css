@@ -1,0 +1,1344 @@
+/* LexiHive daylight palette. Presentation only; app and game behaviour is unchanged. */
+@media screen {
+  :root:not([data-theme="dark"]) {
+    & {
+      color-scheme: light;
+      color: #252b3d;
+      background: #f8f8f5;
+      --bg: #f8f8f5;
+      --surface: #fff;
+      --elevated: #f2f1f8;
+      --line: #e3e5ec;
+      --text: #252b3d;
+      --muted: #626d80;
+      --violet: #6550c5;
+      --lime: #35734b;
+      --cyan: #167488;
+      --amber: #946217;
+      --soft-violet: #efebfc;
+      --soft-mint: #eaf4ec;
+      --soft-honey: #fff4d9;
+      --card-shadow: 0 4px 20px #34315506;
+    }
+    body,
+    .app-layout {
+      background: var(--bg);
+      color: var(--text);
+    }
+    ::selection {
+      background: #ded4ff;
+      color: #35246f;
+    }
+    :is(a, button, summary):focus-visible {
+      outline-color: var(--violet);
+    }
+    :is(input, select, textarea):focus-visible {
+      outline: 2px solid var(--violet);
+      outline-offset: 3px;
+    }
+    .amber {
+      --accent: #946217;
+      --art: #fff3d4;
+      --art-deep: #f8e7ba;
+      --art-light: #996019;
+    }
+    .violet {
+      --accent: #6550c5;
+      --art: #f0eaff;
+      --art-deep: #e4dcf8;
+      --art-light: #6c51ba;
+    }
+    .cyan {
+      --accent: #176a7d;
+      --art: #e8f6f8;
+      --art-deep: #cce8ed;
+      --art-light: #246b7c;
+    }
+    .green {
+      --accent: #35734b;
+      --art: #edf6e4;
+      --art-deep: #d8e9c8;
+      --art-light: #3d6b31;
+    }
+    .rose,
+    .red {
+      --accent: #ad3d65;
+      --art: #ffedf2;
+      --art-deep: #f4d9e3;
+      --art-light: #a7466b;
+    }
+
+    /* A bright, quiet shell gives the game colours room to stand out. */
+    .sidebar {
+      background: #fff;
+      border-color: var(--line);
+    }
+    .topbar {
+      background: #fffffff0;
+      border-color: var(--line);
+      box-shadow: 0 2px 16px #30314b03;
+    }
+    .logo {
+      color: #29273e;
+    }
+    .logo > span:not(.logo-icon),
+    .logo-icon {
+      color: var(--violet);
+    }
+    .logo-icon > span {
+      background: var(--violet);
+    }
+    .logo > i,
+    .nav-dot,
+    .live-dot {
+      background: #4b9364;
+    }
+    .mobile-logo {
+      color: #5e47ae;
+    }
+    .mobile-logo > span {
+      color: #4e8858;
+    }
+    .nav-group-label,
+    .sidebar-copyright {
+      color: #687183;
+    }
+    .sidebar nav a,
+    .sidebar-logout,
+    .help-link {
+      color: #626b7c;
+    }
+    .sidebar nav a:hover,
+    .sidebar-logout:hover {
+      color: #373049;
+      background: #f6f4fa;
+    }
+    .sidebar nav a.active {
+      background: var(--soft-violet);
+      color: #5941b3;
+    }
+    .sidebar nav a.active:before {
+      background: #8065d8;
+    }
+    .new-tag {
+      background: #f3efff;
+      border-color: #ded5f3;
+      color: #6550a0;
+    }
+    .sidebar-promo {
+      background: linear-gradient(135deg, #f1edfc, #f7f5ff);
+      border-color: #e2daf3;
+    }
+    .sidebar-promo h4 {
+      color: #39324c;
+    }
+    .sidebar-promo p {
+      color: #68637a;
+    }
+    .sidebar-promo a {
+      color: #6049b6;
+    }
+    .mini-hex {
+      background: #dcd0ff;
+      color: #5b3daa;
+    }
+    .topbar-section,
+    .top-links,
+    .icon-button {
+      color: #687287;
+    }
+    .topbar-section strong,
+    .signin-link {
+      color: #30374a;
+    }
+    .topbar-section svg,
+    .top-links a.active {
+      color: var(--violet);
+    }
+    .icon-button:hover {
+      background: var(--soft-violet);
+      color: var(--violet);
+    }
+    .top-divider {
+      background: var(--line);
+    }
+    .wallet-pill {
+      background: #fff5df;
+      border-color: #eadab4;
+      color: #82571b;
+      border-radius: 9px;
+    }
+    .wallet-plus {
+      background: #ffedc4;
+      border-color: #e6cf99;
+    }
+    .popover,
+    .sidebar-tooltip {
+      background: #fff;
+      border-color: var(--line);
+      color: var(--text);
+      box-shadow: 0 14px 48px #34315518;
+    }
+    .popover a,
+    .popover button {
+      color: var(--violet);
+    }
+    .avatar {
+      background: #ece5fc;
+      color: #6646a8;
+      border-color: #dacdf2;
+    }
+    .avatar.cyan {
+      background: #e4f3f6;
+      color: #236e80;
+    }
+    .avatar.green {
+      background: #e8f4e7;
+      color: #3d7039;
+    }
+    .avatar.amber {
+      background: #fff1d5;
+      color: #8b611c;
+    }
+    .welcome-row,
+    .welcome-row > a {
+      color: #697184;
+    }
+    .welcome-row > a > svg:first-child {
+      color: #a46d25;
+    }
+    .eyebrow,
+    .section-title .eyebrow {
+      color: #726383;
+    }
+    .text-link,
+    .section-title > .text-link,
+    .back-link:hover {
+      color: var(--violet);
+    }
+    .back-link {
+      color: var(--muted);
+    }
+
+    /* Mint, lilac and honey keep the existing interactive hero playful. */
+    .hero {
+      background:
+        radial-gradient(ellipse at 90% 90%, #fff2cf 0, transparent 47%),
+        linear-gradient(115deg, #f0edfc 0%, #f3f1fd 43%, #e9f4ec 100%);
+      border-color: #e2dfee;
+      border-radius: 24px;
+      box-shadow: 0 9px 32px #37325b06;
+    }
+    .hero:before {
+      background-image: radial-gradient(#8b799d30 0.8px, transparent 0.8px);
+    }
+    .hero-badge {
+      background: #ffffff9c;
+      border-color: #dcd5ee;
+      color: #6b558e;
+    }
+    .hero h1 {
+      color: #29293c;
+    }
+    .hero h1 > span {
+      color: #7760c9;
+    }
+    .hero h1 > span svg {
+      stroke: #a28adf;
+    }
+    .hero-copy > p {
+      color: #666a7d;
+      font-size: 14px;
+      line-height: 1.85;
+    }
+    .hero-trust .check-line {
+      font-size: 11px;
+    }
+    .benefit-strip span {
+      font-size: 11px;
+    }
+    .hero-trust,
+    .check-line {
+      color: #606f67;
+    }
+    .check-line svg {
+      color: #4f875d;
+    }
+    .hero-orbit {
+      border-color: #b5bba43d;
+    }
+    .hero-hive {
+      filter: drop-shadow(0 18px 20px #66604418);
+    }
+    .hero-hex {
+      background: linear-gradient(140deg, #fff, #e7def8);
+      color: #6a4e97;
+      box-shadow: none;
+    }
+    .hero-hex:before {
+      background: linear-gradient(150deg, #ffffff70, transparent);
+      border-color: #a98fc82b;
+    }
+    .hero-hex.hh3 {
+      background: linear-gradient(130deg, #ffe9a9, #eac977);
+      color: #73501d;
+    }
+    .hero-hex > span {
+      color: #88631e;
+    }
+    .hero-hex:hover,
+    .hero-hex.chosen {
+      background: linear-gradient(145deg, #cfbbed, #b9a0df);
+      color: #42285e;
+    }
+    .hero-hex:focus-visible {
+      background: #bad5ac;
+      color: #264b30;
+    }
+    .floating-label {
+      background: #ffffffed;
+      border-color: #e2dbed;
+      box-shadow: 0 12px 26px #4d465b0b;
+    }
+    .floating-label strong {
+      color: #4c435d;
+    }
+    .floating-label div > span {
+      color: #777184;
+    }
+    .bottom-label {
+      background: #f6fcf3;
+      border-color: #d4e5d0;
+    }
+    .bottom-label > svg {
+      color: #64815a;
+    }
+    .tiny-icon {
+      color: #7353b2;
+      background: #eee7fa;
+      border-color: #e1d7f0;
+    }
+    .tiny-icon.green {
+      color: #487442;
+      background: #e7f1df;
+      border-color: #d3e4c8;
+    }
+    .tiny-icon.amber {
+      color: #8b621c;
+      background: #fff1d7;
+      border-color: #ecdfba;
+    }
+    .tiny-icon.cyan {
+      color: #267181;
+      background: #e4f2f5;
+      border-color: #cfe5eb;
+    }
+    .number-float {
+      background: #eff9f9;
+      border-color: #bdd9da;
+      box-shadow: 0 12px 24px #3d6b7512;
+    }
+    .number-float > span {
+      color: #527b81;
+    }
+    .number-float i {
+      background: #e0eff0;
+      border-color: #c1dce0;
+      color: #3a6872;
+    }
+    .number-float i:nth-child(2) {
+      background: #91c6c9;
+      color: #234d57;
+    }
+    .hero-caption {
+      color: #76785f;
+    }
+    .hero-star,
+    .label-spark {
+      color: #af8b35;
+    }
+    .star-b {
+      color: #9276b9;
+    }
+    .benefit-strip {
+      border-color: var(--line);
+    }
+    .benefit-strip strong {
+      color: #374157;
+    }
+    .benefit-strip span {
+      color: #68768a;
+    }
+    .benefit-strip svg {
+      color: #82709a;
+    }
+
+    /* Shared controls and surfaces across player, store and administration pages. */
+    .button {
+      border-radius: 10px;
+    }
+    .button.primary {
+      color: #fff;
+      background: #6c53c7;
+      border-color: #6c53c7;
+      box-shadow: 0 4px 12px #6c53c71c;
+    }
+    .button.primary:hover:not(:disabled) {
+      background: #5940b2;
+      border-color: #5940b2;
+      box-shadow: 0 6px 18px #6c53c729;
+    }
+    .button.secondary,
+    .button.ghost {
+      color: #4b485e;
+      background: #fff;
+      border-color: #dcdce7;
+      box-shadow: 0 2px 4px #37325b03;
+    }
+    .button.secondary:hover:not(:disabled),
+    .button.ghost:hover:not(:disabled) {
+      background: #f2eefb;
+      border-color: #bdb0df;
+    }
+    .button.light {
+      color: #345c35;
+      background: #dceccf;
+      border-color: #caddbb;
+    }
+    .button.danger {
+      color: #a33c53;
+      background: #fff0f1;
+      border-color: #eec5ce;
+    }
+    :is(
+      .game-card,
+      .panel,
+      .stat-card,
+      .table-wrap,
+      .expansion-card,
+      .personal-best,
+      .achievement-card,
+      .achievement-preview > div,
+      .play-area,
+      .game-side section,
+      .progress-preview,
+      .coin-slider-panel,
+      .home-store-inner,
+      .category-tile,
+      .community-card,
+      .info-strip,
+      .onboarding-strip,
+      .campaign-section,
+      .result-dialog
+    ) {
+      background: #fff;
+      border-color: var(--line);
+      box-shadow: var(--card-shadow);
+    }
+    .game-card {
+      border-radius: 17px;
+    }
+    .game-card:hover {
+      border-color: #c8bade;
+      box-shadow: 0 12px 30px #50416c12;
+    }
+    .game-art {
+      background:
+        radial-gradient(ellipse at 55% 15%, #ffffff90, transparent 65%),
+        var(--art, #eeebf7);
+    }
+    .game-name {
+      color: #2d3347;
+    }
+    .game-name > svg {
+      color: #827393;
+    }
+    .game-card-body > p {
+      color: #677184;
+    }
+    .card-bottom {
+      border-color: #ececf2;
+    }
+    .card-bottom > span,
+    .difficulty {
+      color: #737487;
+    }
+    .play-mini {
+      background: #f0eafb;
+      color: #6b4caf;
+      border-color: #e0d5f1;
+    }
+    .play-mini:hover {
+      color: #fff;
+      background: #765bc8;
+    }
+    .favorite {
+      color: #706a7d;
+      background: #ffffffbd;
+    }
+    .favorite.active {
+      color: #ad3d65;
+      background: #fff0f4;
+    }
+    .favorite:hover {
+      background: #fff;
+      color: #ad3d65;
+    }
+    .hex {
+      background: #dab76b36;
+    }
+    .hex:after {
+      border-color: #bd9f533d;
+    }
+    .hex.h3 {
+      background: #a66e24;
+      color: #fff4d9;
+    }
+    .flower .hex {
+      background: #b9ce9a70;
+    }
+    .flower .h3 {
+      background: #5c7c3c;
+      color: #f7fbe8;
+    }
+    .orbit-core {
+      background: linear-gradient(140deg, #c3a7ef, #8d69bc);
+      color: #fff;
+      box-shadow: 0 4px 20px #8e69bd20;
+    }
+    .number-drawing > span,
+    .letter-drawing span,
+    .card-drawing span {
+      border-color: #ffffffb8;
+      box-shadow: 0 6px 12px #36314e0c;
+    }
+    .daily-banner,
+    .dashboard-daily {
+      background: linear-gradient(110deg, #eef5e8, #f5f9ef);
+      border-color: #dbe6cf;
+    }
+    .daily-banner h2,
+    .dashboard-daily h2 {
+      color: #344834;
+    }
+    .daily-banner p,
+    .dashboard-daily p,
+    .daily-reset {
+      color: #5f765b;
+    }
+    .daily-banner .game-art,
+    .dashboard-daily > .game-art {
+      background: transparent;
+    }
+    .category-tile h3 {
+      color: #384154;
+    }
+    .category-tile p {
+      color: #727b88;
+    }
+    .category-tile > svg {
+      color: #9c97aa;
+    }
+    .grow-section,
+    .faq-section,
+    .how-grid > div,
+    .faq-section details,
+    .help-detail {
+      border-color: var(--line);
+    }
+    .grow-section > div > p,
+    .home-store-inner p,
+    .community-card p,
+    .how-grid p,
+    .faq-section details p {
+      color: var(--muted);
+    }
+    .preview-top div span,
+    .progress-preview > p {
+      color: #697386;
+    }
+    .preview-top > svg,
+    .preview-features svg,
+    .how-grid > div > span {
+      color: var(--violet);
+    }
+    .preview-features > span {
+      background: #f7f5fc;
+      border-color: #e6e0f2;
+      color: #716581;
+    }
+    .preview-track span:nth-child(4) {
+      background: linear-gradient(90deg, #ac91e0 25%, #eae4f4 25%);
+    }
+    .preview-track span:nth-child(5) {
+      background: #eae4f4;
+    }
+    .community-card {
+      background: linear-gradient(110deg, #f3effb, #fff);
+    }
+    .community-icons {
+      background: #ece5f8;
+      border-color: #e2d5f0;
+      color: #7a5caa;
+    }
+    .final-cta {
+      background: linear-gradient(120deg, #f0eafb, #f8f5ff 60%, #eef6e9);
+      border-color: #e3dbee;
+      border-radius: 20px;
+    }
+    .final-cta > svg {
+      color: #8770bf;
+    }
+    .final-cta h2 {
+      color: #353044;
+    }
+    .final-cta p {
+      color: #6e687e;
+    }
+
+    .coin-slider-panel {
+      border-radius: 18px;
+    }
+    .slider-top {
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+    .slider-top .eyebrow {
+      font-size: 9px;
+    }
+    .store-safe {
+      font-size: 9px;
+    }
+    .coin-slider-panel .button {
+      font-size: 13px;
+    }
+    .home-store-inner {
+      background: linear-gradient(120deg, #fff5df, #fffaf0);
+    }
+    .coin-slider-panel.compact {
+      border-color: #e7dfd0;
+      background: #fff;
+    }
+    .slider-top .eyebrow {
+      color: #8f6c37;
+    }
+    .store-safe,
+    .slider-amounts > div > span,
+    .slider-labels,
+    .slider-labels > span:nth-child(2),
+    .slider-summary {
+      color: #6f7283;
+    }
+    .slider-amounts strong {
+      color: #353147;
+    }
+    .slider-amounts strong small {
+      color: #737388;
+    }
+    .coin-count strong {
+      color: #9c6b1c;
+    }
+    .coin-count strong small,
+    .coin-count > span:last-child {
+      color: #7a7162;
+    }
+    .slider-convert {
+      color: #9e94ad;
+    }
+    .coin-range {
+      background: linear-gradient(
+        to right,
+        #9e81d8 var(--range-progress),
+        #ece7f4 var(--range-progress)
+      );
+    }
+    .coin-range::-webkit-slider-thumb {
+      background: #fff;
+      border-color: #9476d0;
+      box-shadow: 0 0 0 4px #9476d017;
+    }
+    .coin-range::-moz-range-thumb {
+      background: #fff;
+      border-color: #9476d0;
+    }
+    .quick-amounts button {
+      color: #6e657e;
+      background: #f8f6fb;
+      border-color: #e5dfed;
+    }
+    .quick-amounts button.active {
+      color: #6046a0;
+      background: #eee6fb;
+      border-color: #b29bd6;
+    }
+    .slider-summary {
+      border-color: var(--line);
+    }
+    .availability-note {
+      color: #786a58;
+    }
+    .quote-summary {
+      background: #f7f3fd;
+      border-color: #dcd1ee;
+    }
+    .quote-summary p {
+      color: #655a75;
+    }
+    .secure-note {
+      color: #6c7285 !important;
+    }
+    .store-checks > span {
+      color: #61716d;
+    }
+    .store-checks svg {
+      color: #508258;
+    }
+    .info-strip a,
+    .expansion-note a,
+    .expansion-note > svg,
+    .leaderboard-note > svg {
+      color: var(--violet);
+    }
+    .info-strip > svg {
+      color: #73808a;
+    }
+    .balance-card {
+      background: linear-gradient(125deg, #fff3d8, #fffaf0);
+      border-color: #e8d8b3;
+    }
+    .balance-card > span,
+    .balance-card p {
+      color: #82704e;
+    }
+    .balance-card h2,
+    .expansion-bottom > strong {
+      color: #92641c;
+    }
+    .stat-card > span,
+    .stat-card > p,
+    td small {
+      color: #6a7486;
+    }
+    .stat-card > span > svg,
+    .personal-best > strong {
+      color: var(--violet);
+    }
+    th {
+      background: #f4f3f8;
+      color: #697084;
+      border-color: var(--line);
+    }
+    td {
+      color: #505b70;
+      border-color: #ececf2;
+    }
+    .positive {
+      color: #34754b;
+    }
+    .expansion-note,
+    .leaderboard-note {
+      background: #f1eff9;
+      border-color: #e1dbee;
+      color: #68617a;
+    }
+
+    .catalog-toolbar,
+    .catalog-bottom-note {
+      border-color: var(--line);
+    }
+    .catalog-tabs button {
+      color: #747386;
+    }
+    .catalog-tabs button.active {
+      color: var(--violet);
+    }
+    .catalog-tabs button.active:after {
+      background: var(--violet);
+    }
+    .search-input {
+      background: #fff;
+      border-color: #dedee8;
+      color: #706981;
+    }
+    .search-input input {
+      color: var(--text);
+    }
+    .search-input input::placeholder {
+      color: #747085;
+    }
+    .search-input kbd {
+      border-color: #e1e0ea;
+      color: #747085;
+      background: #f7f6fb;
+    }
+    .category-filters button {
+      color: #71697e;
+      background: #fff;
+      border-color: #e1dfe9;
+      border-radius: 8px;
+    }
+    .category-filters button.active {
+      color: #61449f;
+      background: #eee7fa;
+      border-color: #c6b7df;
+    }
+    .difficulty-filter,
+    .difficulty-filter select,
+    .results-label,
+    .catalog-bottom-note {
+      color: #747386;
+    }
+    .empty {
+      background: radial-gradient(
+        ellipse at 50% 20%,
+        #eee7fa80,
+        transparent 70%
+      );
+      border-color: #d9d1e5;
+    }
+    .empty-icon {
+      color: var(--violet);
+      background: #eee7fa;
+      border-color: #e1d4f1;
+    }
+    .loading {
+      color: #766a88;
+    }
+    .loading svg {
+      color: #8f72c3;
+    }
+    .error-state {
+      background: #fff1f1;
+      border-color: #efd0d3;
+      color: #9f4253;
+    }
+    .error-state p {
+      color: #a43a50;
+    }
+    .form-error {
+      color: #a43a50 !important;
+      background: #fff0f2;
+      border-color: #ecc7d0;
+    }
+    .toast {
+      background: #fff;
+      color: var(--text);
+      border-color: #dcd7e7;
+      box-shadow: 0 10px 36px #3c315923;
+    }
+    .toast-dot {
+      background: #6f58c1;
+    }
+    .toast button {
+      color: #70677d;
+    }
+
+    /* Account forms and protected areas use the same visual language. */
+    .auth-story {
+      background: linear-gradient(150deg, #ece6fa, #f5f0ff 60%, #eef3e4);
+      border-color: #e2d9ed;
+    }
+    .auth-story .eyebrow,
+    .auth-story > .text-link,
+    .auth-story-bottom {
+      color: #7c6a8c;
+    }
+    .auth-story h2 {
+      color: #353044;
+    }
+    .auth-story h2 > span,
+    .auth-mark,
+    .auth-switch a {
+      color: #7c60b8;
+    }
+    .auth-story p {
+      color: #746b80;
+    }
+    .auth-form-wrap > p {
+      font-size: 14px;
+    }
+    .auth-form-wrap .checkbox-label {
+      font-size: 12px;
+    }
+    .settings-layout .checkbox-label {
+      font-size: 13px;
+    }
+    .auth-switch {
+      font-size: 12px !important;
+    }
+    .form label {
+      color: #555c70;
+    }
+    .form label > span > a,
+    .form label.checkbox-label a {
+      color: var(--violet);
+    }
+    .form input:not([type="checkbox"]),
+    .form select,
+    .game-input-form input,
+    .admin-game-row input[type="number"],
+    .currency-picker select {
+      color: #36394e;
+      background: #fff;
+      border-color: #d8d9e4;
+    }
+    .form input::placeholder,
+    .game-input-form input::placeholder {
+      color: #747085;
+    }
+    .password-field > button,
+    .checkbox-label,
+    .form .checkbox-label {
+      color: #717286;
+    }
+    .auth-secure {
+      color: #79768b !important;
+      font-size: 11px !important;
+      border-color: var(--line);
+    }
+    .auth-success,
+    .guest-play-note {
+      color: #39764b;
+    }
+    .session-gate {
+      background: #fffffff7;
+      border-color: var(--line);
+    }
+    .admin-navigation button:hover,
+    .admin-navigation button.active {
+      color: var(--violet);
+      background: var(--soft-violet);
+    }
+    .admin-game-row,
+    .password-change,
+    .session-list > div,
+    .streak-box {
+      border-color: var(--line);
+    }
+    .admin-game-row > label:not(.checkbox-label),
+    .session-list > div,
+    .session-list small {
+      color: #687084;
+    }
+    .verification-banner {
+      color: #896727;
+      background: #fff6e3;
+      border-color: #e7d8b1;
+    }
+    .verification-banner p,
+    .verification-banner > a {
+      color: #846a3c;
+    }
+    .import-banner {
+      color: #6b548b;
+      background: #f2ecfb;
+      border-color: #e1d5ef;
+    }
+    .player-overview {
+      background: linear-gradient(110deg, #f1eafb, #fff8ec);
+      border-color: #e4d9eb;
+    }
+    .xp-track {
+      background: #e9e2f3;
+    }
+    .xp-track > span {
+      background: linear-gradient(90deg, #9b7dcb, #c1a7e2);
+    }
+    .activity-chart i {
+      background: linear-gradient(#b49bdb, #8b6abd);
+    }
+    .activity-chart span,
+    .activity-chart small,
+    .streak-box small,
+    .streak-box p {
+      color: #7a7187;
+    }
+    .personal-best > svg {
+      color: #8d8a9c;
+    }
+    .achievement-preview > div.unlocked {
+      border-color: #dec99e;
+      background: #fffaf0;
+    }
+    .achievement-preview > div > span {
+      background: #f0ebf7;
+      color: #8d77aa;
+      border-color: #e1d7ed;
+    }
+    .achievement-preview > div.unlocked > span,
+    .earned .achievement-medal {
+      color: #9b7224;
+      background: #fff1d5;
+      border-color: #e5cf9d;
+    }
+    .achievement-card.earned {
+      background: linear-gradient(#fff8e8, #fff);
+      border-color: #e4d3af;
+    }
+    .achievement-medal {
+      color: #8a70a8;
+      background: #f1ebf8;
+      border-color: #e2d8ef;
+    }
+    .achievement-card small,
+    .earned small,
+    .account-email {
+      color: #7a6d86;
+    }
+    .danger-panel {
+      background: #fff5f5;
+      border-color: #ebccd2;
+    }
+    .panel.danger-panel {
+      background: #fff7f7;
+      border-color: #ebccd2;
+    }
+    .danger-panel h2 {
+      color: #a64d60;
+    }
+    .segmented-control {
+      background: #ece8f4;
+      border-color: #ddd6e9;
+    }
+    .segmented-control button {
+      color: #766987;
+    }
+    .segmented-control button.active {
+      background: #fff;
+      color: #65508a;
+      box-shadow: 0 2px 6px #4637510a;
+    }
+    .leaderboard-toolbar select {
+      color: var(--text);
+      background: #fff;
+      border-color: var(--line);
+    }
+    .podium > div {
+      background: #fff;
+      border-color: var(--line);
+    }
+    .podium > div.first {
+      background: #fff8e8;
+      border-color: #e6d6b3;
+    }
+    .podium > div > strong,
+    .podium-rank {
+      color: #7d609e;
+    }
+    .first .podium-rank {
+      color: #926a24;
+    }
+    .podium strong small,
+    .podium > div > span:last-child,
+    .leaderboard-footer {
+      color: #797087;
+    }
+    .your-row {
+      background: #f3eefb;
+    }
+
+    /* Game feedback states remain distinct and use all existing classes. */
+    .game-side .game-personal {
+      background: #fffbf0;
+    }
+    .game-side .eyebrow,
+    .free-note > a {
+      color: #7b6798;
+    }
+    .game-scorebar {
+      color: #6d6380;
+      background: #f5f2fa;
+      border-color: #e5deed;
+    }
+    .game-scorebar > span,
+    .game-scorebar small {
+      color: #786e87;
+    }
+    .game-scorebar strong,
+    .game-prompt {
+      color: #393449;
+    }
+    .game-grid > button {
+      background: #f5f1fb;
+      border-color: #d9cfe8;
+      color: #544565;
+      box-shadow: 0 2px 0 #d9cfe865;
+    }
+    .game-grid > button:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--accent) 10%, #fff);
+      border-color: var(--accent);
+    }
+    .game-grid > button.selected {
+      color: #fff;
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .game-grid > button.found {
+      color: #396e48;
+      background: #dcecd8;
+      border-color: #aac69d;
+    }
+    .game-grid > button.lit,
+    .game-grid > button.orbit-lit {
+      background: #9374ce;
+      color: #fff;
+      border-color: #7455b0;
+    }
+    .grid-orbit-recall > button {
+      background: #eee7f7;
+    }
+    .grid-orbit-recall > button.orbit-lit {
+      background: #8c6bc7;
+      color: #fff;
+    }
+    .hex-board > button {
+      color: #825f24;
+      background: #f3e4c3;
+    }
+    .hex-board > button:hover,
+    .hex-board > button.selected,
+    .hex-board > button:focus-visible {
+      color: #fff8e8;
+      background: #a47524;
+    }
+    .selection-controls > strong {
+      color: #7752a3;
+    }
+    .letter-tiles > span {
+      color: #6b5088;
+      background: #f3edf9;
+      border-color: #d9cde8;
+      box-shadow: 0 4px 0 #e7dff0;
+    }
+    .letter-tiles > .unknown {
+      color: #285e6a;
+      background: #d0ebee;
+      border-color: #b6d9df;
+    }
+    .guess-board span {
+      color: #555067;
+      background: #f9f7fc;
+      border-color: #dcd6e6;
+    }
+    .guess-board .correct,
+    .keyboard .correct {
+      color: #fff;
+      background: #537d55;
+      border-color: #47734a;
+    }
+    .guess-board .present {
+      color: #fff;
+      background: #a67f34;
+      border-color: #93702a;
+    }
+    .guess-board .absent,
+    .keyboard .absent {
+      color: #6f7381;
+      background: #e8e8ed;
+      border-color: #dcdce4;
+    }
+    .hive-letter {
+      color: #48643a;
+      background: #e0edce;
+    }
+    .hive-letter.center {
+      color: #fffbe9;
+      background: #a37a2e;
+    }
+    .hive-letter:hover,
+    .hive-letter:focus-visible {
+      color: #fff;
+      background: #5d8050;
+    }
+    .keyboard button {
+      color: #575064;
+      background: #eee9f5;
+      border-color: #dbd2e8;
+    }
+    .keyboard button:hover:not(.correct):not(.absent):not(:disabled) {
+      background: #e0d6ef;
+    }
+    .rescue-chances {
+      color: #b55175;
+    }
+    .ladder-history > span {
+      color: #8c6528;
+    }
+    .ladder-history svg {
+      color: #81718f;
+    }
+    .code-history > div {
+      background: #f7f3fc;
+      border-color: #ddd4e9;
+    }
+    .code-history > div > span:first-child,
+    .code-history small {
+      color: #796b8b;
+    }
+    .code-pegs > i {
+      background: #d4cadd;
+    }
+    .code-pegs .correct {
+      background: #4d855a;
+    }
+    .code-pegs .present {
+      background: #b98a31;
+    }
+    .game-bottom {
+      background: #faf9fc;
+      border-color: #e6e0ed;
+      color: #7d7389;
+    }
+    .game-bottom button {
+      color: #746187;
+    }
+    .game-feedback {
+      color: #6b5694;
+    }
+    .game-feedback.success {
+      color: #36734a;
+    }
+    .result-dialog {
+      color: var(--text);
+      box-shadow: 0 24px 90px #2e244a2b;
+    }
+    .result-dialog::backdrop {
+      background: #36304466;
+      backdrop-filter: blur(5px);
+    }
+    .result-symbol {
+      color: #8b6ab7;
+      background: #f0e7fa;
+    }
+    .result-stats {
+      background: #f6f2fb;
+      border-color: #e4daee;
+    }
+    .result-stats > span,
+    .result-stars small {
+      color: #7d728c;
+    }
+    .result-stats strong {
+      color: #604485;
+    }
+    .result-stars {
+      color: #ac7d2d;
+    }
+    .daily-landing h1 span {
+      color: #69854d;
+    }
+    .campaign-section {
+      background: #fffdf7;
+      border-color: #e6dcc9;
+    }
+    .campaign-section .eyebrow {
+      color: #8c713c;
+    }
+    .campaign-section > div > span:last-child {
+      color: #7b7287;
+    }
+    .campaign-levels button {
+      color: #806297;
+      background: #f2ecf8;
+      border-color: #e0d4ec;
+    }
+    .campaign-levels button > span {
+      color: #9b782f;
+    }
+    .campaign-levels button.active {
+      color: #79561d;
+      background: #f9e8bd;
+      border-color: #d7bd82;
+    }
+
+    .policy-document {
+      background: #fff;
+      box-shadow: var(--card-shadow);
+    }
+    .policy-document p {
+      color: #596477;
+    }
+    .policy-document > h1 + p {
+      color: #687084;
+    }
+    .policy-callout {
+      background: #f8f4ff;
+      border-color: #ddd0ef;
+      border-left-color: var(--violet);
+    }
+    .policy-table {
+      background: #f5f3fa;
+      border-color: var(--line);
+    }
+    .policy-table td {
+      background: transparent;
+      border-color: var(--line);
+    }
+    .policy-document-footer p {
+      color: #6d677d;
+    }
+    .policy-navigation a.active {
+      color: var(--violet);
+      background: #eee8fa;
+    }
+    .policy-cards > a {
+      background: #fff;
+      box-shadow: var(--card-shadow);
+    }
+    .policy-cards > a:hover {
+      background: #f8f5fd;
+    }
+    .policy-company {
+      background: #fff;
+    }
+    footer.site-footer {
+      background: #f1f2ed;
+      border-color: #e1e4db;
+    }
+    .site-footer .footer-company p,
+    .site-footer address {
+      color: #6e776d;
+    }
+    .site-footer strong,
+    .site-footer h2 {
+      color: #3d483e;
+    }
+    .site-footer nav a,
+    .site-footer .footer-copyright {
+      color: #657161;
+    }
+    .site-footer .footer-all-policies {
+      color: #655082;
+    }
+    .site-footer > .footer-bottom {
+      border-color: #dce1d7;
+    }
+    .site-footer .footer-payments {
+      border: 1px solid #e2e3db;
+    }
+    @media (max-width: 600px) {
+      .hero {
+        border-radius: 18px;
+      }
+      .hero h1 {
+        font-size: clamp(36px, 11vw, 48px);
+        letter-spacing: -1.8px;
+      }
+      .hero-copy > p {
+        font-size: 13px;
+      }
+      .hero-buttons {
+        gap: 10px;
+      }
+      .hero-buttons .button {
+        gap: 6px;
+        padding: 12px 10px;
+        font-size: 12px;
+        min-height: 46px;
+      }
+      .coin-slider-panel {
+        border-radius: 14px;
+      }
+    }
+  }
+}

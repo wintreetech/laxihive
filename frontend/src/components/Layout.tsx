@@ -26,6 +26,7 @@ import {
   PanelLeftOpen,
 } from "lucide-react";
 import { Logo } from "./UI";
+import ThemeToggle from "./ThemeToggle";
 import { useAuth, number, readLocal, writeLocal } from "../lib/api";
 import { company } from "../content/company";
 import policyIndex from "../content/policy-index.json";
@@ -132,7 +133,9 @@ export default function Layout() {
     window.scrollTo(0, 0);
     const title =
       location.pathname.split("/").filter(Boolean).at(-1) || "Discover";
-    const policyTitle = policyIndex.find((policy) => policy.path === location.pathname)?.title;
+    const policyTitle = policyIndex.find(
+      (policy) => policy.path === location.pathname,
+    )?.title;
     document.title = `${policyTitle || title.replaceAll("-", " ").replace(/\b\w/g, (l) => l.toUpperCase())} · LexiHive`;
   }, [location.pathname]);
   return (
@@ -311,13 +314,18 @@ export default function Layout() {
             <NavLink to="/store">Coin Store</NavLink>
           </nav>
           <div className="topbar-actions">
-            <Link className="wallet-pill" to={user ? "/wallet" : "/store"}>
+            <Link
+              className="wallet-pill"
+              to={user ? "/wallet" : "/store"}
+              aria-label={user ? "Open wallet" : "Coin store"}
+            >
               <Coins size={17} />
               <span>{user ? number(user.wallet?.balance) : "Coin store"}</span>
               <span className="wallet-plus">
                 <Plus size={12} />
               </span>
             </Link>
+            <ThemeToggle />
             <div className="popover-wrap">
               <button
                 className="icon-button notification-button"
@@ -402,13 +410,23 @@ export default function Layout() {
             <Logo />
             <p className="footer-tagline">Play a little. Grow a little.</p>
             <strong>{company.name}</strong>
-            <p>Company No. {company.number}<br />Registered in {company.jurisdiction}</p>
+            <p>
+              Company No. {company.number}
+              <br />
+              Registered in {company.jurisdiction}
+            </p>
             <address>{company.address}</address>
           </div>
           <nav className="footer-policies" aria-label="Footer policies">
             <h2>Policies</h2>
-            {policyIndex.map((policy) => <Link key={policy.path} to={policy.path}>{policy.title}</Link>)}
-            <Link className="footer-all-policies" to="/policies">View all policies</Link>
+            {policyIndex.map((policy) => (
+              <Link key={policy.path} to={policy.path}>
+                {policy.title}
+              </Link>
+            ))}
+            <Link className="footer-all-policies" to="/policies">
+              View all policies
+            </Link>
           </nav>
           <nav className="footer-contact" aria-label="Footer support">
             <h2>Here to help</h2>

@@ -9,6 +9,7 @@ import { createRoot } from "react-dom/client";
 import "./styles.css";
 import "./platform.css";
 import "./policies.css";
+import "./light-theme.css";
 import App from "./App.tsx";
 
 createRoot(document.getElementById("root")).render(
