@@ -1,4 +1,108 @@
 /* Shared platform layouts; keep the original visual palette. */
+.app-layout {
+  --sidebar-width: 260px;
+}
+.app-layout.is-collapsed {
+  --sidebar-width: 76px;
+}
+.sidebar {
+  width: var(--sidebar-width);
+  transition: transform 180ms ease;
+  min-height: 0;
+}
+.workspace {
+  margin-left: var(--sidebar-width);
+}
+.sidebar-animating > .sidebar {
+  transition:
+    width 180ms ease,
+    transform 180ms ease;
+}
+.sidebar-animating > .workspace {
+  transition: margin-left 180ms ease;
+}
+.catalog-toolbar {
+  flex-wrap: wrap;
+}
+.catalog-tabs {
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+.search-input {
+  max-width: 100%;
+}
+.search-input input {
+  min-width: 0;
+  flex: 1;
+}
+.sidebar-brand {
+  padding: 0 4px 24px;
+  gap: 8px;
+}
+.sidebar-toggle {
+  flex-shrink: 0;
+}
+.is-collapsed .sidebar {
+  padding-inline: 10px;
+}
+.is-collapsed .sidebar-brand {
+  flex-direction: column;
+  padding-inline: 0;
+}
+.is-collapsed .sidebar .nav-label,
+.is-collapsed .sidebar .nav-group-label,
+.is-collapsed .sidebar .nav-dot,
+.is-collapsed .sidebar .new-tag,
+.is-collapsed .sidebar .sidebar-promo,
+.is-collapsed .sidebar .sidebar-copyright,
+.is-collapsed .sidebar .help-link > svg:last-child {
+  display: none;
+}
+.is-collapsed .sidebar nav {
+  margin-bottom: 18px;
+}
+.is-collapsed .sidebar nav a,
+.is-collapsed .sidebar .sidebar-logout,
+.is-collapsed .sidebar .help-link {
+  justify-content: center;
+  min-height: 46px;
+  padding: 12px;
+  gap: 0;
+}
+.sidebar-tooltip {
+  position: fixed;
+  left: 84px;
+  z-index: 100;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--elevated);
+  color: var(--text);
+  font-size: 14px;
+  pointer-events: none;
+  box-shadow: 0 6px 20px #0004;
+}
+@media (max-width: 760px) {
+  .sidebar {
+    width: min(86vw, 280px);
+  }
+  .app-layout .workspace {
+    margin-left: 0;
+    transition: none;
+  }
+  .sidebar-toggle {
+    display: none;
+  }
+  .sidebar nav a {
+    min-height: 46px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-layout .sidebar,
+  .app-layout .workspace {
+    transition: none;
+  }
+}
 .sidebar {
   overflow-y: auto;
   overflow-x: hidden;
@@ -35,6 +139,82 @@
   grid-template-columns: 200px minmax(0, 1fr);
   gap: 24px;
   align-items: start;
+}
+.admin-workspace {
+  transition: grid-template-columns 180ms ease;
+}
+.admin-workspace.is-collapsed {
+  grid-template-columns: 72px minmax(0, 1fr);
+}
+.admin-navigation {
+  min-height: 0;
+  scrollbar-width: thin;
+  overscroll-behavior: contain;
+}
+.admin-navigation button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  flex-shrink: 0;
+}
+.admin-navigation button span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.admin-workspace.is-collapsed .admin-navigation button {
+  justify-content: center;
+  padding-inline: 8px;
+}
+.admin-workspace.is-collapsed .admin-navigation button span {
+  display: none;
+}
+.settlement-form {
+  margin-top: 16px;
+  min-width: 240px;
+  max-width: 440px;
+}
+.settlement-form input,
+.settlement-form select,
+.settlement-form textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 16px;
+}
+.settlement-form .checkbox-label input {
+  width: 18px;
+  min-height: 18px;
+}
+.settlement-form textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+.settlement-form p,
+.settlement-form label {
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.settlement-details {
+  margin-block: 12px;
+}
+@media (max-width: 1200px) {
+  .admin-workspace.is-collapsed {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .admin-workspace.is-collapsed .admin-navigation {
+    grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-workspace {
+    transition: none;
+  }
 }
 .admin-navigation {
   position: sticky;
@@ -285,6 +465,32 @@
 .button {
   font-size: 14px;
   min-height: 40px;
+}
+.footer-bottom {
+  width: 100%;
+  margin-left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.footer-payments {
+  width: 152px;
+  max-width: 100%;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #fff;
+}
+.footer-payments img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.footer-copyright {
+  font-size: 11px;
+  line-height: 1.5;
 }
 dialog {
   max-width: calc(100vw - 28px);

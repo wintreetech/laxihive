@@ -2,7 +2,9 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { MongoClient, BSON } from "mongodb";
 import { backend, readBackendEnv } from "./env.mjs";
-const client = new MongoClient(readBackendEnv().DATABASE_URL);
+const client = new MongoClient(readBackendEnv().DATABASE_URL, {
+  serverSelectionTimeoutMS: 10000,
+});
 try {
   await client.connect();
   const database = client.db(),
@@ -50,6 +52,11 @@ try {
   console.log(
     `Private local snapshot saved in ${folder}. ${collections.length} collections; no source database changes.`,
   );
+} catch {
+  console.error(
+    "Database backup failed. Check connectivity and permissions for the configured database. No connection string or records are logged.",
+  );
+  process.exitCode = 1;
 } finally {
   await client.close();
 }

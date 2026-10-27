@@ -95,7 +95,11 @@ export function requireAuth(req: Request, _res: Response, next: NextFunction) {
 }
 export function requireAdmin(req: Request, _res: Response, next: NextFunction) {
   try {
-    assert(req.auth?.role === "ADMIN", 403, "Administrator access required.");
+    assert(
+      req.auth?.role === "ADMIN" && req.auth.verified,
+      403,
+      "Verified administrator access required.",
+    );
     next();
   } catch (e) {
     next(e);

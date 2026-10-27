@@ -2,6 +2,7 @@ import { createApp } from "./app.js";
 import { db } from "./config/database.js";
 import { validateEnvironment } from "./config/environment.js";
 import { startMaintenance } from "./services/maintenance.service.js";
+import { assertAccountEmailConfiguration } from "./config/account-policy.js";
 const environment = validateEnvironment();
 if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.length < 32)
   throw new Error(
@@ -22,13 +23,7 @@ if (
     "APP_ORIGIN must be the frontend origin, for example http://localhost:5174, without a page path.",
   );
 process.env.APP_ORIGIN = frontend.origin;
-if (
-  process.env.NODE_ENV === "production" &&
-  (!process.env.SMTP_HOST || !process.env.MAIL_FROM)
-)
-  throw new Error(
-    "Production requires SMTP_HOST and MAIL_FROM for account recovery.",
-  );
+assertAccountEmailConfiguration();
 await db.$connect();
 const stopMaintenance = startMaintenance(
   environment.PAYMENT_RECONCILIATION_SECONDS,

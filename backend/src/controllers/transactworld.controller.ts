@@ -2,11 +2,14 @@ import { createHash, randomBytes } from "node:crypto";
 import type { Request, Response } from "express";
 import type { PurchaseCurrency } from "../../shared/rules.js";
 import { z } from "zod";
+import { customerEmailAllowed } from "../config/account-policy.js";
+import { quoteSnapshot } from "../services/coin-quote.service.js";
 import { db, atomic, assert } from "../config/database.js";
 import {
   gatewayConfig,
   gatewayReady,
   gatewayCurrencies,
+  gatewayInquiryAvailable,
   buildGatewayRequest,
   verifyNotification,
   verifyHostedResponse,
@@ -21,9 +24,13 @@ export async function initTransactworld(req: Request, res: Response) {
   assert(
     process.env.PAYMENTS_ENABLED === "true" && gatewayReady(c),
     503,
-    "Transactworld checkout is awaiting merchant settings or activation. No payment has been taken.",
+    "Checkout is awaiting merchant setup or activation. No payment has been taken.",
   );
-  assert(req.auth?.verified, 403, "Verify your email before purchasing coins.");
+  assert(
+    customerEmailAllowed(!!req.auth?.verified),
+    403,
+    "Verify your email before purchasing coins.",
+  );
   const { quoteId } = z
     .object({ quoteId: z.string().max(64) })
     .strict()
@@ -69,6 +76,7 @@ export async function initTransactworld(req: Request, res: Response) {
         cents: quote.cents,
         currency: quote.currency,
         coins: quote.coins,
+        ...quoteSnapshot(quote),
         checkoutId: createHash("sha256").update(randomBytes(32)).digest("hex"),
       },
     });
@@ -136,7 +144,7 @@ export function transactworldCallback(inquiry: Inquiry = inquirePayment) {
         },
       });
     });
-    if (c.authToken)
+    if (gatewayInquiryAvailable(c))
       await reconcileTransactworld(
         { ...payment, intentId: notification.paymentId },
         inquiry,
@@ -202,7 +210,7 @@ export async function transactworldReturn(req: Request, res: Response) {
         },
       });
     });
-    if (c.authToken) {
+    if (gatewayInquiryAvailable(c)) {
       await reconcileTransactworld(
         { ...payment, intentId: result.paymentId },
         inquirePayment,

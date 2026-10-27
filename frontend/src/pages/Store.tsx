@@ -456,8 +456,15 @@ export function PurchaseHistory() {
                   </td>
                   <td>{number(p.coins)}</td>
                   <td>
-                    <Badge color={p.status === "paid" ? "green" : "amber"}>
+                    <Badge
+                      color={
+                        p.status === "paid" && p.credited ? "green" : "amber"
+                      }
+                    >
                       {p.status.replaceAll("_", " ")}
+                      {!p.credited &&
+                        ["paid", "success"].includes(p.status) &&
+                        " · unverified"}
                     </Badge>
                   </td>
                 </tr>
@@ -488,24 +495,27 @@ export function PurchaseStatus({ cancelled = false }: { cancelled?: boolean }) {
     queryFn: () => api(`/payments/${id}/status`),
     enabled: !!id && !!user,
     refetchInterval: (query) =>
-      query.state.data?.status === "pending"
+      query.state.data?.status === "pending" ||
+      (query.state.data?.credited === false &&
+        ["paid", "success"].includes(query.state.data?.status))
         ? 3000
         : query.state.data?.status === "abandoned"
           ? 30000
           : false,
   });
   const status = q.data?.status;
+  const fulfilled = status === "paid" && q.data?.credited === true;
   const failed = status === "failed" || status === "expired";
   const adjusted = ["refunded", "partially_refunded", "disputed"].includes(
     status,
   );
   useEffect(() => {
-    if (status === "paid") refresh();
-  }, [status, refresh]);
+    if (fulfilled) refresh();
+  }, [fulfilled, refresh]);
   return (
     <div className="page purchase-status">
       <span className="empty-icon">
-        {status === "paid" ? (
+        {fulfilled ? (
           <Check size={32} />
         ) : cancelled ? (
           <RefreshCw size={32} />
@@ -514,7 +524,7 @@ export function PurchaseStatus({ cancelled = false }: { cancelled?: boolean }) {
         )}
       </span>
       <h1>
-        {status === "paid"
+        {fulfilled
           ? "Your next adventure is funded."
           : adjusted
             ? "Your purchase has a payment adjustment."
@@ -527,8 +537,8 @@ export function PurchaseStatus({ cancelled = false }: { cancelled?: boolean }) {
                   : "Waiting for payment verification."}
       </h1>
       <p>
-        {status === "paid"
-          ? `${number(q.data.coins)} coins were credited after server-verified payment confirmation.`
+        {fulfilled
+          ? `${number(q.data.coins)} coins were credited after ${q.data.fulfillmentSource === "MANUAL_SETTLEMENT" ? "an independently approved settlement review" : "server-verified payment confirmation"}.`
           : adjusted
             ? "Open your wallet to see the recorded coin adjustment and any reconciliation amount. Contact support with this order reference for assistance."
             : status === "abandoned"
@@ -540,8 +550,11 @@ export function PurchaseStatus({ cancelled = false }: { cancelled?: boolean }) {
                   : "This page never credits coins. Your wallet updates only after the server verifies the payment gateway notification and payment status."}
       </p>
       {q.error && <ErrorState error={q.error} />}
-      <Badge color={status === "paid" ? "green" : failed ? "red" : "amber"}>
+      <Badge color={fulfilled ? "green" : failed ? "red" : "amber"}>
         {status || "No verified payment status available"}
+        {!q.data?.credited &&
+          ["paid", "success"].includes(status) &&
+          " · fulfillment unverified"}
       </Badge>
       {id && (
         <p>
@@ -551,7 +564,7 @@ export function PurchaseStatus({ cancelled = false }: { cancelled?: boolean }) {
       )}
       {q.data?.provider === "transactworld" &&
         q.data?.canReconcile &&
-        status !== "paid" && (
+        !fulfilled && (
           <button
             className="button secondary"
             onClick={async () => {
@@ -568,11 +581,8 @@ export function PurchaseStatus({ cancelled = false }: { cancelled?: boolean }) {
           </button>
         )}
       <div className="button-row">
-        <Link
-          className="button primary"
-          to={status === "paid" ? "/wallet" : "/store"}
-        >
-          {status === "paid" ? "Open wallet" : "Back to coin store"}
+        <Link className="button primary" to={fulfilled ? "/wallet" : "/store"}>
+          {fulfilled ? "Open wallet" : "Back to coin store"}
           <ArrowRight size={16} />
         </Link>
         <Link className="button secondary" to="/games">

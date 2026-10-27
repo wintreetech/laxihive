@@ -1,3 +1,13 @@
+> Current authentication behavior: production generates and refreshes Inquiry tokens automatically using MEMBER_ID and WORKING_KEY. No manually supplied TW_AUTH_TOKEN is required; it remains an optional override. Production verification remains server-to-server and fails closed when authentication or Inquiry is unavailable. Earlier launch observations below are historical.
+
+## Launch-policy, settlement and footer upgrade - 27 October 2026
+
+54 unit checks and 50 reported MongoDB integration checks passed. The 18 existing browser checks passed after responsive fixes; all six launch browser checks passed separately, covering persistent navigation, mobile focus/dismissal, footer image, optional verification/reactivation, two-admin settlement, and rejection of an unfulfilled display-only paid status. TypeScript, ESLint, both production builds and generated Netlify proxy output passed. Native 200% browser-toolbar zoom was not separately certified; short and equivalent reduced viewports were checked.
+
+A read-only ECB endpoint check confirmed the documented response shape. The targeted source/history scan checked 136 candidate files and two history revisions with no findings. Sixteen frontend build text files contained none of the configured backend secrets. All financial tests used isolated local databases and fake gateway transports. No real card charge or hosting deployment was performed.
+
+Before additive Atlas migration 005, a private snapshot of all 26 original collections was saved. After migration, 100 original records were compared: missing=0, changed=0 (excluding migration bookkeeping/new fields). Existing local data and backups remain intact. The actual local app reports healthy API, optional customer verification, 20 games, zero paid starter modes, independent pricing and EUR merchant checkout. See [LAUNCH_UPGRADE.md](LAUNCH_UPGRADE.md) for full status and remaining owner/provider configuration.
+
 ## Two-folder reorganization - 27 October 2026
 
 The root now contains only frontend and backend application folders (plus hidden Git metadata). Dependencies and lockfiles are separate. Shared game code, scripts, documentation and private local database/backups were relocated under backend; browser tests and frontend tools are under frontend. Database contents and environment values were preserved.

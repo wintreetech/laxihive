@@ -68,12 +68,14 @@ Frontend imports the pure game rules from `backend/shared` so the browser and se
 
 ## Configuration
 
+The latest [launch upgrade report](backend/docs/LAUNCH_UPGRADE.md) covers optional customer email verification, collapsible navigation, settlement review, FX quotes and Render scheduling. `REQUIRE_EMAIL_VERIFICATION=false` is the local launch setting; administrator verification remains mandatory. The supplied Visa/Mastercard image is included in the footer.
+
 - `backend/.env`: `APP_ORIGIN` controls the frontend URL and allowed browser origin; `PORT` controls the API port. The current frontend URL is http://localhost:5174. Use that exact hostname.
 - `frontend/.env`: keep `VITE_API_URL=/api`. Vite proxies API requests to the configured backend port. Merchant credentials never belong here.
 - Atlas and existing `.env` values were preserved. Previous local database files and backups now live in ignored `backend/.local/`. Database helpers use the new location. No accounts or financial records were deleted.
 - First administrator: register and verify `support@lexihive.com`, then run `npm.cmd run admin:provision -- --email support@lexihive.com` in backend or from the root. Refresh `/admin`. There is no default admin password.
 - All starter modes were initially free; administrators explicitly publish pricing changes. Test wallet spending with audited admin coin adjustments rather than marking gateway payments successful.
-- Production payment verification still requires the merchant Inquiry token and public HTTPS callbacks. Production email verification requires working SMTP. See the gateway and deployment guides before enabling public commerce.
+- Production payment verification automatically obtains Inquiry tokens from the member ID and working key, and requires public HTTPS callbacks and merchant API access. Production email verification requires working SMTP. See the gateway and deployment guides before enabling public commerce.
 
 ## Checks
 

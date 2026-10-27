@@ -1,0 +1,37 @@
+# Create the lexihive-production environment group with backend-only credentials
+# before applying this blueprint. Applying it creates billable hosting resources.
+services:
+  - type: web
+    name: laxihive
+    runtime: node
+    rootDir: backend
+    buildCommand: npm ci --include=dev && npm run db:generate && npm run build
+    startCommand: npm run db:migrate && npm run db:seed && npm start
+    healthCheckPath: /api/health
+    envVars:
+      - fromGroup: lexihive-production
+      - key: NODE_VERSION
+        value: "24"
+      - key: NODE_ENV
+        value: production
+      - key: REQUIRE_EMAIL_VERIFICATION
+        value: "false"
+      - key: APP_ORIGIN
+        value: https://lexihive09.netlify.app
+      - key: PUBLIC_API_URL
+        value: https://laxihive.onrender.com
+      - key: PAYMENT_MAINTENANCE_MODE
+        value: scheduled
+  - type: cron
+    name: lexihive-maintenance
+    runtime: node
+    rootDir: backend
+    schedule: "*/5 * * * *"
+    buildCommand: npm ci --include=dev && npm run db:generate && npm run build
+    startCommand: node dist/src/jobs/maintenance.js
+    envVars:
+      - fromGroup: lexihive-production
+      - key: NODE_VERSION
+        value: "24"
+      - key: NODE_ENV
+        value: production

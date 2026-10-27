@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 import type { Request, Response } from "express";
 import { db, atomic, assert, HttpError } from "../config/database.js";
-import { ledger } from "./wallet.service.js";
+import { ledger, fulfillCoinPurchase } from "./wallet.service.js";
 
 export function stripeClient() {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -128,19 +128,7 @@ export async function processStripeEvent(stripe: Stripe, event: Stripe.Event) {
         400,
         "Payment is not fully settled.",
       );
-      await ledger(
-        tx,
-        p.userId,
-        p.coins,
-        "purchased",
-        `payment:${p.id}`,
-        `Coin purchase ${p.currency.toUpperCase()} ${(p.cents / 100).toFixed(2)}`,
-      );
-      await tx.purchase.upsert({
-        where: { paymentId: p.id },
-        create: { paymentId: p.id },
-        update: {},
-      });
+      await fulfillCoinPurchase(tx, current, "GATEWAY");
     }
     const credited = current.credited || !!paid;
     // Proportional reversal includes tax in the charge total; cumulative values avoid duplicate debits.

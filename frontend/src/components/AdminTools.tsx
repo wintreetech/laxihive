@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   post,
   useToast,
@@ -6,6 +7,7 @@ import {
   number,
   readLocal,
   writeLocal,
+  api,
 } from "../lib/api";
 import { Badge } from "./UI";
 import { accessTypes, accessLabel } from "../../../backend/shared/access";
@@ -85,6 +87,13 @@ export const paymentColumns: [string, (r: any) => any][] = [
       <>
         {r.status}
         <small>{r.credited ? "Wallet fulfilled" : "Not credited"}</small>
+        <small>
+          {r.fulfillmentSource === "MANUAL_SETTLEMENT"
+            ? "Independent settlement review"
+            : r.gatewayVerifiedAt
+              ? "Gateway verified"
+              : "No verified source"}
+        </small>
       </>
     ),
   ],
@@ -414,6 +423,7 @@ export function Analytics({ data }: any) {
         ))}
       </div>
       <p>{data.note}</p>
+      <RevenueReport />
       <section className="panel">
         <h2>Category session coin usage</h2>
         <Records
@@ -534,5 +544,62 @@ export function Analytics({ data }: any) {
         />
       </section>
     </>
+  );
+}
+export function RevenueReport() {
+  const [range, setRange] = useState(() => ({
+    from: new Date(Date.now() - 29 * 86400000).toISOString().slice(0, 10),
+    to: new Date().toISOString().slice(0, 10),
+  }));
+  const query = useQuery({
+    queryKey: ["admin-revenue-report", range],
+    queryFn: () => api("/admin/revenue-report?" + new URLSearchParams(range)),
+  });
+  return (
+    <section className="panel">
+      <h2>Settlement and reporting-currency revenue</h2>
+      <form
+        className="admin-filters"
+        onSubmit={(e) => {
+          e.preventDefault();
+          const d = new FormData(e.currentTarget);
+          setRange({ from: String(d.get("from")), to: String(d.get("to")) });
+        }}
+      >
+        <label>
+          From (UTC)
+          <input name="from" type="date" defaultValue={range.from} required />
+        </label>
+        <label>
+          Through (UTC)
+          <input name="to" type="date" defaultValue={range.to} required />
+        </label>
+        <button className="button secondary">Apply dates</button>
+      </form>
+      {query.isPending ? (
+        <p role="status">Loading recorded revenue…</p>
+      ) : query.error ? (
+        <p role="alert">{query.error.message}</p>
+      ) : (
+        <>
+          <p>
+            {money(query.data.netBaseCents, query.data.baseCurrency)} net from{" "}
+            {query.data.convertedOrders} orders with known conversion.{" "}
+            {query.data.missingFxOrders} historical orders have no recorded rate
+            and are excluded from this combined figure.
+          </p>
+          <Records
+            items={query.data.sources}
+            columns={[
+              ["Verification source", (r) => r.source],
+              ["Currency", (r) => r.currency.toUpperCase()],
+              ["Orders", (r) => r.orders],
+              ["Net amount", (r) => money(r.cents, r.currency)],
+            ]}
+          />
+          <p>{query.data.note}</p>
+        </>
+      )}
+    </section>
   );
 }

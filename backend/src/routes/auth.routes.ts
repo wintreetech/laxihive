@@ -11,6 +11,10 @@ import {
   digest,
 } from "../middleware/auth.middleware.js";
 import { sendToken } from "../services/email.service.js";
+import {
+  requiresEmailVerification,
+  emailDeliveryAvailable,
+} from "../config/account-policy.js";
 export const auth = Router();
 export const passwordSchema = z
   .string()
@@ -40,6 +44,7 @@ export function publicUser(u: any) {
     role: u.role,
     status: u.status,
     verified: !!u.verifiedAt,
+    emailVerificationRequired: requiresEmailVerification(),
     profile: u.profile,
     wallet: u.wallet
       ? { balance: u.wallet.balance, debt: u.wallet.debt }
@@ -65,15 +70,18 @@ auth.post("/register", async (req, res) => {
     include: { profile: true, wallet: true },
   });
   const csrf = await createSession(user.id, res);
-  try {
-    await sendToken(user.id, user.email, "verify");
-  } catch {
-    console.error("Verification email delivery failed");
-  }
+  if (requiresEmailVerification())
+    try {
+      await sendToken(user.id, user.email, "verify");
+    } catch {
+      console.error("Verification email delivery failed");
+    }
   res.status(201).json({
     user: publicUser(user),
     csrf,
-    message: "Account created. Check your email to verify your account.",
+    message: requiresEmailVerification()
+      ? "Account created. Check your email to verify your account."
+      : "Account created. Welcome to LexiHive.",
   });
 });
 auth.post("/login", async (req, res) => {
@@ -103,14 +111,22 @@ auth.post("/login", async (req, res) => {
 });
 auth.get("/session", async (req, res) => {
   if (!req.auth) {
-    res.json({ user: null, csrf: null });
+    res.json({
+      user: null,
+      csrf: null,
+      requireEmailVerification: requiresEmailVerification(),
+    });
     return;
   }
   const user = await db.user.findUniqueOrThrow({
     where: { id: req.auth.userId },
     include: { profile: true, wallet: true },
   });
-  res.json({ user: publicUser(user), csrf: req.auth.csrf });
+  res.json({
+    user: publicUser(user),
+    csrf: req.auth.csrf,
+    requireEmailVerification: requiresEmailVerification(),
+  });
 });
 auth.post("/logout", requireAuth, async (req, res) => {
   await db.session.deleteMany({ where: { id: req.auth!.id } });
@@ -118,6 +134,11 @@ auth.post("/logout", requireAuth, async (req, res) => {
   res.json({ ok: true });
 });
 auth.post("/forgot-password", async (req, res) => {
+  assert(
+    emailDeliveryAvailable(),
+    503,
+    "Account recovery email is not configured. Contact support for assistance.",
+  );
   const { email } = z
     .object({ email: z.email().transform((e) => e.toLowerCase()) })
     .parse(req.body);
@@ -134,6 +155,11 @@ auth.post("/forgot-password", async (req, res) => {
   });
 });
 auth.post("/resend-verification", requireAuth, async (req, res) => {
+  assert(
+    emailDeliveryAvailable(),
+    503,
+    "Verification email is not configured. Contact support for assistance.",
+  );
   const user = await db.user.findUniqueOrThrow({
     where: { id: req.auth!.userId },
   });

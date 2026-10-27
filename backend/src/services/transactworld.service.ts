@@ -3,7 +3,8 @@ import { isIP } from "node:net";
 import type { Payment } from "@prisma/client";
 import { z } from "zod";
 import { atomic, assert, HttpError } from "../config/database.js";
-import { ledger } from "./wallet.service.js";
+import { ledger, fulfillCoinPurchase } from "./wallet.service.js";
+import { gatewayAuthToken } from "./gateway-token.service.js";
 import {
   purchaseCurrencies,
   type PurchaseCurrency,
@@ -89,10 +90,6 @@ export function gatewaySetupIssues(c = gatewayConfig()) {
     );
   if (!gatewayCurrencies(c).length)
     issues.push("TW_SUPPORTED_CURRENCIES must contain USD, EUR, or both.");
-  if (process.env.NODE_ENV === "production" && !c.authToken)
-    issues.push(
-      "TW_AUTH_TOKEN is required in production for browser-independent capture verification and recovery.",
-    );
   for (const [name, value] of [
     ["MEMBER_ID", c.memberId],
     ["WORKING_KEY", c.workingKey],
@@ -115,6 +112,14 @@ export function gatewaySetupIssues(c = gatewayConfig()) {
 }
 export function gatewayReady(c = gatewayConfig()) {
   return gatewaySetupIssues(c).length === 0;
+}
+export function gatewayInquiryAvailable(c = gatewayConfig()) {
+  return (
+    !!c.authToken.trim() ||
+    (process.env.NODE_ENV === "production" &&
+      !!c.memberId.trim() &&
+      !!c.workingKey.trim())
+  );
 }
 export function decimalCents(value: unknown) {
   assert(
@@ -191,7 +196,7 @@ export function buildGatewayRequest(
   assert(
     c.memberId && c.workingKey,
     503,
-    "Transactworld credentials are not configured.",
+    "Payment gateway credentials are not configured.",
   );
   assert(payment.checkoutId, 500, "This payment has no transaction reference.");
   const currency = payment.currency.toUpperCase();
@@ -272,7 +277,7 @@ export function verifyNotification(
   assert(
     timingSafeEqual(Buffer.from(n.checksum, "hex"), expected),
     400,
-    "Invalid Transactworld callback checksum.",
+    "Invalid payment gateway callback checksum.",
   );
   return n;
 }
@@ -315,7 +320,7 @@ export function verifyHostedResponse(
       Buffer.from(expected, "hex"),
     ),
     400,
-    "Invalid Transactworld return checksum.",
+    "Invalid payment gateway return checksum.",
   );
   return n;
 }
@@ -334,11 +339,7 @@ export type Inquiry = (
   c: TransactworldConfig,
 ) => Promise<InquiryResult>;
 export const inquirePayment: Inquiry = async (paymentId, c) => {
-  assert(
-    c.authToken,
-    503,
-    "Set TW_AUTH_TOKEN to enable server-to-server payment verification.",
-  );
+  let token = await gatewayAuthToken(c);
   const body = new URLSearchParams({
     "authentication.memberId": c.memberId,
     "authentication.checksum": md5(
@@ -350,16 +351,23 @@ export const inquirePayment: Inquiry = async (paymentId, c) => {
   });
   let response: globalThis.Response;
   try {
-    response = await fetch(`${c.origin}/transactionServices/REST/v1/inquiry`, {
-      method: "POST",
-      headers: {
-        AuthToken: c.authToken,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body,
-      signal: AbortSignal.timeout(15000),
-      redirect: "error",
-    });
+    const send = () =>
+      fetch(`${c.origin}/transactionServices/REST/v1/inquiry`, {
+        method: "POST",
+        headers: {
+          AuthToken: token,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body,
+        signal: AbortSignal.timeout(15000),
+        redirect: "error",
+      });
+    response = await send();
+    if (!c.authToken.trim() && [401, 403].includes(response.status)) {
+      await response.body?.cancel();
+      token = await gatewayAuthToken(c, true);
+      response = await send();
+    }
   } catch {
     throw new HttpError(
       503,
@@ -369,7 +377,7 @@ export const inquirePayment: Inquiry = async (paymentId, c) => {
   assert(
     response.ok,
     503,
-    "Gateway verification failed. Check the merchant AuthToken and gateway account configuration.",
+    "Gateway verification failed. Check the merchant credentials and API access.",
   );
   const json = await response.json().catch(() => null);
   assert(
@@ -399,7 +407,7 @@ export async function reconcileTransactworld(
   assert(
     payment.provider === "transactworld" && payment.intentId,
     409,
-    "A signed gateway notification is required before checking this purchase.",
+    "A gateway payment reference is required before checking this purchase.",
   );
   const verified = await inquiry(payment.intentId, c);
   assert(
@@ -433,20 +441,13 @@ export async function reconcileTransactworld(
     );
   return atomic(async (tx) => {
     const p = await tx.payment.findUniqueOrThrow({ where: { id: payment.id } });
+    assert(
+      !p.intentId || p.intentId === payment.intentId,
+      409,
+      "This order is linked to a different gateway payment.",
+    );
     if (captured && !p.credited) {
-      await ledger(
-        tx,
-        p.userId,
-        p.coins,
-        "purchased",
-        `payment:transactworld:${p.id}`,
-        `Transactworld coin purchase ${p.currency.toUpperCase()} ${(p.cents / 100).toFixed(2)}`,
-      );
-      await tx.purchase.upsert({
-        where: { paymentId: p.id },
-        update: {},
-        create: { paymentId: p.id },
-      });
+      await fulfillCoinPurchase(tx, p, "GATEWAY");
     }
     const credited = p.credited || captured;
     const refundCents = Math.max(p.refundedCents, refunded ?? 0),
@@ -472,7 +473,7 @@ export async function reconcileTransactworld(
         delta,
         "refund",
         `tw-reversal:${p.id}:${target}`,
-        "Verified Transactworld payment reversal",
+        "Verified payment gateway reversal",
         true,
       );
     const status = credited
@@ -489,6 +490,7 @@ export async function reconcileTransactworld(
     return tx.payment.update({
       where: { id: p.id },
       data: {
+        intentId: payment.intentId,
         credited,
         status,
         reversedCoins: Math.max(p.reversedCoins, target),

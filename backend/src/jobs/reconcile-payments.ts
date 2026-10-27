@@ -2,12 +2,13 @@ import { db } from "../config/database.js";
 import {
   gatewayConfig,
   gatewayReady,
+  gatewayInquiryAvailable,
   reconcileTransactworld,
 } from "../services/transactworld.service.js";
 try {
-  if (!gatewayReady(gatewayConfig()) || !gatewayConfig().authToken)
+  if (!gatewayReady(gatewayConfig()) || !gatewayInquiryAvailable())
     throw new Error(
-      "Configure Transactworld credentials and TW_AUTH_TOKEN before reconciliation.",
+      "Configure merchant credentials before reconciliation. Production retrieves its verification token automatically.",
     );
   const payments = await db.payment.findMany({
     where: {

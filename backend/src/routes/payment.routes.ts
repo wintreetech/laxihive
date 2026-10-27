@@ -3,12 +3,19 @@ import type Stripe from "stripe";
 import { z } from "zod";
 import { db, atomic, assert, HttpError } from "../config/database.js";
 import { requireAuth } from "../middleware/auth.middleware.js";
-import { quoteCoins, purchaseCurrencies } from "../../shared/rules.js";
+import { purchaseCurrencies } from "../../shared/rules.js";
 import { ledger } from "../services/wallet.service.js";
+import { customerEmailAllowed } from "../config/account-policy.js";
+import {
+  quoteCoinPricing,
+  quoteSnapshot,
+} from "../services/coin-quote.service.js";
+import { fxSettings, loadFxRate } from "../services/fx.service.js";
 import {
   gatewayConfig,
   gatewayReady,
   gatewayCurrencies,
+  gatewayInquiryAvailable,
   reconcileTransactworld,
 } from "../services/transactworld.service.js";
 export function paymentsRoutes(stripe: Stripe | null) {
@@ -19,6 +26,10 @@ export function paymentsRoutes(stripe: Stripe | null) {
     });
     const provider = process.env.PAYMENT_PROVIDER || "transactworld";
     const tw = gatewayConfig();
+    const paymentsEnabled = process.env.PAYMENTS_ENABLED === "true";
+    const paymentsAvailable =
+      paymentsEnabled &&
+      (provider === "transactworld" ? gatewayReady(tw) : !!stripe);
     const published = await db.gameAccessConfig.findMany({
       where: {
         active: true,
@@ -29,8 +40,23 @@ export function paymentsRoutes(stripe: Stripe | null) {
       },
     });
     const visible = await db.game.findMany({ where: { visible: true } });
+    let fxRate = null,
+      fxIssue = null;
+    if (config.pricingPolicy === "FX_BASED")
+      try {
+        fxRate = await loadFxRate(
+          fxSettings().base,
+          fxSettings().base === "EUR" ? "USD" : "EUR",
+        );
+      } catch {
+        fxIssue =
+          "Exchange-rate pricing is temporarily unavailable for the other currency.";
+      }
     res.json({
       ...config,
+      baseCurrency: fxSettings().base,
+      fxRate,
+      fxIssue,
       provider,
       sessionExamples: published
         .filter((p) => visible.some((g) => g.slug === p.gameSlug))
@@ -44,9 +70,13 @@ export function paymentsRoutes(stripe: Stripe | null) {
         provider === "transactworld"
           ? gatewayCurrencies(tw)
           : purchaseCurrencies,
-      paymentsAvailable:
-        process.env.PAYMENTS_ENABLED === "true" &&
-        (provider === "transactworld" ? gatewayReady(tw) : !!stripe),
+      paymentsAvailable,
+      paymentsPaused: !paymentsEnabled,
+      paymentUnavailableMessage: !paymentsEnabled
+        ? "Coin purchases are coming soon while merchant setup is completed. You can still play games and browse prices in USD and EUR."
+        : !paymentsAvailable
+          ? "Checkout is temporarily unavailable. Please try again later."
+          : null,
       testMode:
         provider === "transactworld" ? tw.environment === "sandbox" : true,
     });
@@ -69,18 +99,18 @@ export function paymentsRoutes(stripe: Stripe | null) {
     const p = await db.coinPricingConfig.findUniqueOrThrow({
       where: { id: "global" },
     });
-    let coins: number;
+    let calculation;
     try {
-      coins = quoteCoins(cents, p, currency);
+      calculation = await quoteCoinPricing(cents, currency, p);
     } catch (e: any) {
-      throw new HttpError(400, e.message);
+      throw new HttpError(e instanceof HttpError ? e.status : 400, e.message);
     }
     const quote = await db.coinQuote.create({
       data: {
         userId: req.auth!.userId,
         cents,
         currency: currency.toLowerCase(),
-        coins,
+        ...calculation,
         pricingVersion: p.version,
         expiresAt: new Date(Date.now() + 10 * 60000),
       },
@@ -120,6 +150,7 @@ export function paymentsRoutes(stripe: Stripe | null) {
           currency: true,
           coins: true,
           status: true,
+          credited: true,
           createdAt: true,
           refundedCents: true,
         },
@@ -139,10 +170,13 @@ export function paymentsRoutes(stripe: Stripe | null) {
         coins: true,
         provider: true,
         gatewayVerifiedAt: true,
+        credited: true,
+        fulfillmentSource: true,
+        manuallyVerifiedAt: true,
       },
     });
     assert(p, 404, "Purchase not found.");
-    res.json({ ...p, canReconcile: !!gatewayConfig().authToken });
+    res.json({ ...p, canReconcile: gatewayInquiryAvailable() });
   });
   r.post("/payments/init", requireAuth, initTransactworld);
   r.post("/payments/:id/reconcile", requireAuth, async (req, res) => {
@@ -164,7 +198,7 @@ export function paymentsRoutes(stripe: Stripe | null) {
       "Checkout is not configured yet. No payment has been taken.",
     );
     assert(
-      req.auth!.verified,
+      customerEmailAllowed(req.auth!.verified),
       403,
       "Verify your email before purchasing coins.",
     );
@@ -196,6 +230,7 @@ export function paymentsRoutes(stripe: Stripe | null) {
         cents: quote.cents,
         currency: quote.currency,
         coins: quote.coins,
+        ...quoteSnapshot(quote),
       },
     });
     assert(
@@ -261,7 +296,11 @@ export function paymentsRoutes(stripe: Stripe | null) {
     );
   });
   r.post("/expansions/:id/unlock", requireAuth, async (req, res) => {
-    assert(req.auth!.verified, 403, "Verify your email to unlock expansions.");
+    assert(
+      customerEmailAllowed(req.auth!.verified),
+      403,
+      "Verify your email to unlock expansions.",
+    );
     const result = await atomic(async (tx) => {
       const unlock = await tx.gameUnlock.findUnique({
         where: { id: req.params.id as string },

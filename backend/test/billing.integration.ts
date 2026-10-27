@@ -7,6 +7,7 @@ import request from "supertest";
 import { randomUUID } from "node:crypto";
 import { solve } from "../shared/solve.fixture.js";
 process.loadEnvFile(".env");
+process.env.REQUIRE_EMAIL_VERIFICATION = "true";
 const url = new URL(
   process.env.TEST_DATABASE_URL ||
     "mongodb://127.0.0.1:27018/lexihive_test?replicaSet=lexihive-local",
@@ -104,7 +105,11 @@ before(async () => {
   const push = spawnSync(
     process.execPath,
     [cli, "db", "push", "--skip-generate"],
-    { cwd: new URL("../", import.meta.url), env: process.env, encoding: "utf8" },
+    {
+      cwd: new URL("../", import.meta.url),
+      env: process.env,
+      encoding: "utf8",
+    },
   );
   assert.equal(push.status, 0, push.stderr);
   const seed = spawnSync(

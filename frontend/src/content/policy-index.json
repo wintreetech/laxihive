@@ -1,0 +1,58 @@
+[
+    {
+        "path":  "/terms",
+        "title":  "Terms and Conditions",
+        "sourceFile":  "LexiHive-Terms-and-Conditions.docx",
+        "sourceSha256":  "bdf642736b7db30031eaed1408b631d1ae9fe34b32b5cf39f997813878497c0b",
+        "paragraphCount":  61
+    },
+    {
+        "path":  "/privacy",
+        "title":  "Privacy Policy",
+        "sourceFile":  "LexiHive-Privacy-Policy.docx",
+        "sourceSha256":  "fdb33f02dc5f6fcdac3da5868f2761472c093664f3494928819a6f233c9b8ac9",
+        "paragraphCount":  55
+    },
+    {
+        "path":  "/refund-policy",
+        "title":  "Refunds and Returns Policy",
+        "sourceFile":  "LexiHive-Refunds-and-Returns-Policy.docx",
+        "sourceSha256":  "2c3f3f4c65c1f610d6b9c8973bade2f1bbedaaabe1d9385cbb9ad2260da5db62",
+        "paragraphCount":  32
+    },
+    {
+        "path":  "/cancellation-policy",
+        "title":  "Cancellation Policy",
+        "sourceFile":  "LexiHive-Cancellation-Policy.docx",
+        "sourceSha256":  "cd65319fa1eff1b395b489b7f933baf3142a919633605fc31e896372a40f2828",
+        "paragraphCount":  24
+    },
+    {
+        "path":  "/digital-delivery-policy",
+        "title":  "Digital Delivery and Access Policy",
+        "sourceFile":  "LexiHive-Digital-Delivery-and-Access-Policy.docx",
+        "sourceSha256":  "21165483baa6593978b48798d924fa253b626eb508db85aa019468bd8408791a",
+        "paragraphCount":  32
+    },
+    {
+        "path":  "/payment-method-policy",
+        "title":  "Payment Method Policy",
+        "sourceFile":  "LexiHive-Payment-Method-Policy.docx",
+        "sourceSha256":  "c859285157601c562b506c4a78645cbde54d19d2f658f2fd466ad01a22dc1a30",
+        "paragraphCount":  30
+    },
+    {
+        "path":  "/virtual-currency",
+        "title":  "Virtual Currency Policy",
+        "sourceFile":  "LexiHive-Virtual-Currency-Policy.docx",
+        "sourceSha256":  "fcf12c96c1b8ddae51fa1640cc1d8749c2c47c1b91a3dc8605a5ab60c5ba61f1",
+        "paragraphCount":  34
+    },
+    {
+        "path":  "/complaints-policy",
+        "title":  "Complaints and Disputes Policy",
+        "sourceFile":  "LexiHive-Complaints-and-Disputes-Policy.docx",
+        "sourceSha256":  "14380b72dc2dec55101fed01c87c93a5fce90fcdcea82210d7d22efc61630cf5",
+        "paragraphCount":  51
+    }
+]

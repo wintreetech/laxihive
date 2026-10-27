@@ -2,6 +2,7 @@ import { db } from "../config/database.js";
 import {
   gatewayConfig,
   gatewayReady,
+  gatewayInquiryAvailable,
   reconcileTransactworld,
 } from "./transactworld.service.js";
 import {
@@ -12,6 +13,8 @@ let running = false;
 export async function maintenanceTick() {
   if (running) return;
   running = true;
+  let verified = 0,
+    failures = 0;
   try {
     await refundUnstartedSessions();
     await expireGameSessions();
@@ -28,10 +31,10 @@ export async function maintenanceTick() {
     const c = gatewayConfig();
     if (
       process.env.PAYMENT_RECONCILIATION_ENABLED === "false" ||
-      !c.authToken ||
+      !gatewayInquiryAvailable(c) ||
       !gatewayReady(c)
     )
-      return;
+      return { verified, failures, verificationConfigured: false };
     const orders = await db.payment.findMany({
       where: {
         provider: "transactworld",
@@ -53,7 +56,9 @@ export async function maintenanceTick() {
     for (const p of orders)
       try {
         await reconcileTransactworld(p);
+        verified++;
       } catch {
+        failures++;
         console.error(
           JSON.stringify({
             event: "payment_verification_unavailable",
@@ -61,11 +66,13 @@ export async function maintenanceTick() {
           }),
         );
       }
+    return { verified, failures, verificationConfigured: true };
   } finally {
     running = false;
   }
 }
 export function startMaintenance(seconds: number) {
+  if (process.env.PAYMENT_MAINTENANCE_MODE === "scheduled") return () => {};
   const run = () =>
     maintenanceTick().catch(() =>
       console.error("Maintenance unavailable; retrying on the next interval."),

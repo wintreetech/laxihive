@@ -31,5 +31,6 @@ export default defineConfig({
   projects: [
     { name: "core", testMatch: ["platform.spec.ts", "verification.spec.ts"] },
     { name: "billing", testMatch: "billing.spec.ts", dependencies: ["core"] },
+    { name: "launch", testMatch: "launch.spec.ts", dependencies: ["billing"] },
   ],
 });

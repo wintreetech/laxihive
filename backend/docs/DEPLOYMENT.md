@@ -1,10 +1,20 @@
+> Current authentication behavior: production generates and refreshes Inquiry tokens automatically using MEMBER_ID and WORKING_KEY. No manually supplied TW_AUTH_TOKEN is required; it remains an optional override. Production verification remains server-to-server and fails closed when authentication or Inquiry is unavailable. Earlier launch observations below are historical.
+
 # Deployment and owner configuration
+
+## Current Render / Netlify launch
+
+See [LAUNCH_UPGRADE.md](LAUNCH_UPGRADE.md) for the current deployment checklist and backend/render.yaml. Render Node root is backend; build is `npm ci --include=dev && npm run db:generate && npm run build`; start is `npm run db:migrate && npm run db:seed && npm start`; health path is `/api/health`. The configured public origins are https://lexihive09.netlify.app and https://laxihive.onrender.com. Hosting was not deployed by the upgrade.
+
+Set `REQUIRE_EMAIL_VERIFICATION=false` for the temporary launch policy. Production startup then permits missing SMTP, but email-dependent actions fail safely until delivery is configured. Setting it to true requires production SMTP and restores the original paid-feature gates for unverified customers. Verified-admin requirements always remain. Backend credentials belong only in the backend host's environment.
+
+The Netlify configuration supplies Node 24, /api and the public backend proxy target. Create the separate Render cron deliberately before selecting scheduled maintenance mode; it is a separately billed service. Use an appropriate compute/email plan for production; a sleeping free web service does not provide an always-running reconciliation timer.
 
 ## Current platform release
 
 The current release adds migration 004, first-admin provisioning, unpublished game-pricing drafts, trial/session billing and background maintenance. Read [the release review](RELEASE_REVIEW.md), [Admin setup](ADMIN.md) and [session billing](SESSION_BILLING.md) before publishing prices. Seeding never assigns admin roles and never publishes paid starter pricing.
 
-For the selected Transactworld provider, production additionally requires `PAYMENT_PROVIDER=transactworld`, `TW_ENVIRONMENT=live`, `MEMBER_ID`, `WORKING_KEY`, merchant-enabled `TW_SUPPORTED_CURRENCIES`, operational `TW_AUTH_TOKEN`, `PUBLIC_API_URL` as the public HTTPS API origin, and `PAYMENT_RECONCILIATION_ENABLED=true`. Set `PAYMENT_RECONCILIATION_SECONDS` to 60 initially. Hosted return and notification overrides can stay blank to derive the standard routes. Stripe keys below apply only to the existing optional Stripe test adapter.
+For the selected Transactworld provider, production additionally requires `PAYMENT_PROVIDER=transactworld`, `TW_ENVIRONMENT=live`, `MEMBER_ID`, `WORKING_KEY`, merchant-enabled `TW_SUPPORTED_CURRENCIES`, automatic merchant API authentication, `PUBLIC_API_URL` as the public HTTPS API origin, and `PAYMENT_RECONCILIATION_ENABLED=true`. Set `PAYMENT_RECONCILIATION_SECONDS` to 60 initially. Hosted return and notification overrides can stay blank to derive the standard routes. Stripe keys below apply only to the existing optional Stripe test adapter.
 
 Configure `SUPPORT_EMAIL`, an HTTPS `APP_ORIGIN`, production SMTP and a fresh random session secret. Rotate merchant keys disclosed during development. Token renewal, external payment delivery, deployment, SMTP delivery and refund/dispute behavior need external verification. The local application checks do not certify a production launch.
 

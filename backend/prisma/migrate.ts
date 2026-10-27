@@ -1,4 +1,5 @@
 import { MongoClient } from "mongodb";
+import { applyLaunchMigration } from "./launch-migration.js";
 const client = new MongoClient(process.env.DATABASE_URL!);
 await client.connect();
 const db = client.db();
@@ -131,6 +132,10 @@ try {
     );
   console.log(
     "Applied additive migration 004: account status and backward-compatible session snapshots. No paid pricing published.",
+  );
+  await applyLaunchMigration(db);
+  console.log(
+    "Applied additive migration 005: pricing policy and review serialization metadata. Existing prices, wallet amounts and payment outcomes were preserved.",
   );
 } finally {
   await client.close();

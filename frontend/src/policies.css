@@ -1,0 +1,168 @@
+/* Company footer and supplied policy documents. */
+.contact-actions {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.contact-card .contact-actions .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 46px;
+  margin: 0;
+  padding: 12px 18px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.contact-card .contact-actions .contact-policy-link {
+  color: var(--violet);
+  background: transparent;
+  border: 1px solid var(--line);
+}
+.contact-card .contact-actions .contact-policy-link:hover {
+  background: #a89bf610;
+  border-color: var(--violet);
+}
+.contact-actions svg { flex-shrink: 0; }
+@media (max-width: 480px) {
+  .contact-actions { flex-direction: column; }
+  .contact-card .contact-actions .button { width: 100%; justify-content: space-between; }
+}
+footer.site-footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 32px 28px;
+  align-items: start;
+  padding: 40px 38px 24px;
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--muted);
+}
+.site-footer > .footer-company {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0;
+  min-width: 0;
+  width: auto;
+  font-size: inherit;
+}
+.site-footer .footer-company p {
+  display: block;
+  margin: 0;
+  font-size: inherit;
+  line-height: inherit;
+}
+.site-footer .footer-company .footer-tagline { margin-bottom: 8px; }
+.site-footer strong, .site-footer h2 { color: var(--text); }
+.site-footer address, .policy-company address, .contact-card address { font-style: normal; }
+.site-footer address { max-width: 280px; }
+.site-footer nav { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.site-footer h2 { margin: 0 0 8px; font-size: 14px; font-weight: 600; }
+.site-footer a { overflow-wrap: anywhere; }
+.site-footer nav a:hover, .site-footer nav a:focus-visible { color: var(--violet); text-decoration: underline; text-underline-offset: 4px; }
+.site-footer .footer-all-policies { color: var(--violet); margin-top: 6px; }
+.site-footer > .footer-bottom {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+  gap: 16px;
+  width: 100%;
+  font-size: 12px;
+}
+.site-footer .footer-copyright { font-size: 12px; }
+.policy-page, .policy-hub { max-width: 1280px; margin-inline: auto; }
+.policy-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 28px; }
+.policy-toolbar .button { font-size: 13px; }
+.policy-layout { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 32px; align-items: start; }
+.policy-navigation { position: sticky; top: 92px; min-width: 0; font-size: 13px; line-height: 1.55; }
+.policy-navigation > nav { display: flex; flex-direction: column; gap: 5px; }
+.policy-nav-label { color: var(--muted); font-size: 10px; font-weight: 600; letter-spacing: 1.5px; margin-bottom: 14px; }
+.policy-navigation a { display: block; padding: 9px 12px; border-radius: 8px; color: var(--muted); }
+.policy-navigation a:hover, .policy-navigation a:focus-visible { color: var(--text); background: var(--elevated); }
+.policy-navigation a.active { color: var(--violet); background: #a89bf610; box-shadow: inset 2px 0 var(--violet); }
+.policy-contents { border-top: 1px solid var(--line); margin-top: 22px; padding-top: 18px; }
+.policy-contents summary { cursor: pointer; font-weight: 600; padding: 6px 0; color: var(--text); }
+.policy-contents nav { max-height: 40vh; overflow-y: auto; margin-top: 8px; scrollbar-width: thin; }
+.policy-contents nav a { font-size: 12px; }
+.policy-document { min-width: 0; max-width: 800px; padding: 32px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+.policy-document [data-policy-source] { white-space: pre-wrap; overflow-wrap: anywhere; scroll-margin-top: 100px; }
+.policy-document h1 { margin: 0 0 18px; font-family: "Space Grotesk", Inter, sans-serif; font-size: clamp(28px, 3vw, 40px); font-weight: 600; line-height: 1.2; letter-spacing: -1px; }
+.policy-document h2, .policy-document h3, .policy-document h4, .policy-document h5, .policy-document h6 { margin: 32px 0 14px; font-size: 19px; line-height: 1.55; color: var(--text); font-weight: 600; }
+.policy-document p { margin: 0 0 17px; font-size: 15px; line-height: 1.85; color: #c8d0df; }
+.policy-document > h1 + p { color: var(--muted); font-size: 12px; line-height: 1.8; }
+.policy-document strong { color: var(--text); font-weight: 600; }
+.policy-document a, .policy-company a { color: var(--violet); text-decoration: underline; text-underline-offset: 3px; }
+.policy-table-wrap { margin: 24px 0 28px; }
+.policy-table { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 0; background: var(--elevated); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.policy-table td { padding: 16px 12px; vertical-align: top; border-right: 1px solid var(--line); }
+.policy-table td:last-child { border-right: 0; }
+.policy-table p { font-size: 12px; line-height: 1.9; margin: 0; }
+.policy-callout { padding: 20px; border: 1px solid #a89bf644; border-left: 3px solid var(--violet); border-radius: 10px; margin: 24px 0; background: #a89bf608; }
+.policy-callout p:last-child { margin-bottom: 0; }
+.policy-document .policy-document-footer { border-top: 1px solid var(--line); padding-top: 24px; margin-top: 32px; }
+.policy-document-footer p { color: var(--muted); font-size: 11px; margin: 0; }
+.policy-hub { max-width: 1060px; }
+.policy-hub header { margin: 28px 0 32px; }
+.policy-hub h1 { font-size: clamp(30px, 3.5vw, 44px); line-height: 1.2; letter-spacing: -1.3px; margin: 14px 0; }
+.policy-hub header p { color: var(--muted); font-size: 15px; }
+.policy-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.policy-cards > a { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 16px; padding: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.policy-cards > a:hover, .policy-cards > a:focus-visible { border-color: var(--violet); background: var(--elevated); }
+.policy-cards span { grid-column: 1 / -1; font-size: 11px; letter-spacing: 2px; color: var(--violet); }
+.policy-cards h2 { margin: 0; font-size: 17px; font-weight: 500; line-height: 1.5; }
+.policy-cards svg { color: var(--muted); margin-top: 3px; }
+.policy-company { margin-top: 32px; padding: 28px; border: 1px solid var(--line); border-radius: 12px; font-size: 14px; line-height: 1.8; color: var(--muted); }
+.policy-company h2 { font-size: 17px; color: var(--text); margin: 0 0 12px; }
+.policy-company p { margin: 12px 0; }
+@media (max-width: 1150px) {
+  .policy-layout { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .policy-navigation { position: static; }
+  .policy-navigation > nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 12px; }
+  .policy-nav-label { grid-column: 1 / -1; margin-bottom: 6px; }
+  .policy-contents { margin-top: 14px; padding-top: 12px; }
+  .policy-document { max-width: none; }
+  footer.site-footer { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .site-footer .footer-company { grid-column: 1 / -1; }
+}
+@media (max-width: 600px) {
+  footer.site-footer { grid-template-columns: minmax(0, 1fr); padding: 32px 20px 24px; gap: 28px; }
+  .site-footer > .footer-bottom { align-items: flex-start; flex-direction: column; }
+  .policy-toolbar { gap: 12px; margin-bottom: 24px; }
+  .policy-toolbar .button { font-size: 12px; padding: 10px; }
+  .policy-navigation a { font-size: 12px; padding: 9px 8px; }
+  .policy-document { padding: 22px 18px; border-radius: 12px; }
+  .policy-document h2 { font-size: 18px; }
+  .policy-table, .policy-table tbody, .policy-table tr, .policy-table td { display: block; width: 100%; }
+  .policy-table td { border-right: 0; border-bottom: 1px solid var(--line); padding: 12px 16px; }
+  .policy-table td:last-child { border-bottom: 0; }
+  .policy-callout { padding: 16px; }
+  .policy-cards { grid-template-columns: minmax(0, 1fr); }
+  .policy-company { padding: 22px; }
+}
+@media print {
+  body { background: #fff !important; color: #111 !important; }
+  body:has(.policy-document) .sidebar,
+  body:has(.policy-document) .topbar,
+  body:has(.policy-document) .site-footer,
+  body:has(.policy-document) .skip-link,
+  .policy-navigation, .policy-toolbar { display: none !important; }
+  body:has(.policy-document) .workspace { margin: 0 !important; width: 100% !important; }
+  .policy-page { max-width: none; padding: 0 !important; }
+  .policy-layout { display: block; }
+  .policy-document { border: 0; padding: 0; max-width: none; background: #fff; }
+  .policy-document p, .policy-document strong, .policy-document h1, .policy-document h2, .policy-document a { color: #111 !important; }
+  .policy-document p { font-size: 11pt; }
+  .policy-document h2 { break-after: avoid; }
+  .policy-table, .policy-callout { background: #f5f5f5; border-color: #ccc; break-inside: avoid; }
+}

@@ -17,6 +17,7 @@ const prismaCLI = join(
   "index.js",
 );
 process.loadEnvFile(".env");
+process.env.REQUIRE_EMAIL_VERIFICATION = "true";
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL =
   process.env.TEST_DATABASE_URL ||
@@ -1026,6 +1027,165 @@ test("MongoDB-backed platform integration", async (t) => {
           .canReconcile,
         false,
       );
+    },
+  );
+  await t.test(
+    "production generates its own token and verifies USD/EUR notifications before exactly-once fulfillment",
+    async () => {
+      const { gatewayConfig, responseChecksum } =
+        await import("../src/services/transactworld.service.js");
+      const prior = {
+        NODE_ENV: process.env.NODE_ENV,
+        PUBLIC_API_URL: process.env.PUBLIC_API_URL,
+        TW_ENVIRONMENT: process.env.TW_ENVIRONMENT,
+        TW_AUTH_TOKEN: process.env.TW_AUTH_TOKEN,
+      };
+      const previousFetch = globalThis.fetch;
+      let authCalls = 0;
+      let inquiryResponse: any;
+      let outage = false;
+      try {
+        Object.assign(process.env, {
+          NODE_ENV: "production",
+          PUBLIC_API_URL: "https://api.example.com",
+          TW_ENVIRONMENT: "live",
+          TW_AUTH_TOKEN: "",
+        });
+        const config = gatewayConfig();
+        globalThis.fetch = (async (url, options) => {
+          assert.equal(options?.redirect, "error");
+          if (String(url).endsWith("/authToken")) {
+            authCalls++;
+            const body = options?.body as URLSearchParams;
+            assert.equal(body.get("authentication.memberId"), config.memberId);
+            assert.equal(body.get("authentication.sKey"), config.workingKey);
+            return Response.json({
+              AuthToken: "production-integration-token-only",
+            });
+          }
+          assert.equal(
+            url,
+            config.origin + "/transactionServices/REST/v1/inquiry",
+          );
+          assert.equal(
+            new Headers(options?.headers).get("AuthToken"),
+            "production-integration-token-only",
+          );
+          if (outage) return new Response(null, { status: 503 });
+          return Response.json(inquiryResponse);
+        }) as typeof fetch;
+        for (const currency of ["USD", "EUR"]) {
+          const quote = await post("/coins/quote", { cents: 500, currency });
+          assert.equal(quote.status, 201, JSON.stringify(quote.body));
+          const init = await post("/payments/init", { quoteId: quote.body.id });
+          assert.equal(init.status, 200, JSON.stringify(init.body));
+          const transaction = init.body.paymentData.merchantTransactionId;
+          const body = {
+            paymentId: currency === "USD" ? "2468101" : "2468102",
+            merchantTransactionId: transaction,
+            amount: "5.00",
+            transactionStatus: "Y",
+            checksum: "",
+          };
+          body.checksum = responseChecksum(
+            config,
+            body.paymentId,
+            transaction,
+            body.amount,
+            "Y",
+          );
+          const callback = () =>
+            request(app)
+              .post(`/api/payments/forward/${transaction}`)
+              .type("form")
+              .send(body);
+          const before = await db.wallet.findUniqueOrThrow({
+            where: { userId },
+          });
+          const unchanged = async () => {
+            const wallet = await db.wallet.findUniqueOrThrow({
+              where: { userId },
+            });
+            assert.equal(
+              wallet.balance - wallet.debt,
+              before.balance - before.debt,
+            );
+            assert.equal(
+              (
+                await db.payment.findUniqueOrThrow({
+                  where: { id: init.body.paymentId },
+                })
+              ).credited,
+              false,
+            );
+          };
+          outage = true;
+          assert.equal((await callback()).status, 503);
+          await unchanged();
+          outage = false;
+          inquiryResponse = { ...body, currency, status: "preauthsuccess" };
+          assert.equal((await callback()).status, 200);
+          await unchanged();
+          inquiryResponse = {
+            ...inquiryResponse,
+            currency: currency === "USD" ? "EUR" : "USD",
+            status: "capturesuccess",
+          };
+          assert.equal((await callback()).status, 400);
+          await unchanged();
+          inquiryResponse.currency = currency;
+          const delivered = await Promise.all([callback(), callback()]);
+          for (const response of delivered)
+            assert.equal(response.status, 200, JSON.stringify(response.body));
+          const returnBody = {
+            ...body,
+            currency,
+            status: "capturesuccess",
+            checksum: responseChecksum(
+              config,
+              body.paymentId,
+              transaction,
+              body.amount,
+              "capturesuccess",
+            ),
+          };
+          assert.equal(
+            (
+              await request(app)
+                .post(`/api/payments/transactworld/return/${transaction}`)
+                .type("form")
+                .send(returnBody)
+            ).status,
+            303,
+          );
+          const after = await db.wallet.findUniqueOrThrow({
+            where: { userId },
+          });
+          assert.equal(
+            after.balance - after.debt,
+            before.balance - before.debt + quote.body.coins,
+          );
+          assert.equal(
+            await db.walletTransaction.count({
+              where: {
+                reference: `payment:transactworld:${init.body.paymentId}`,
+              },
+            }),
+            1,
+          );
+        }
+        assert.equal(
+          authCalls,
+          1,
+          "The generated token is reused for both currencies and repeated callbacks",
+        );
+      } finally {
+        globalThis.fetch = previousFetch;
+        for (const [key, value] of Object.entries(prior)) {
+          if (value === undefined) delete process.env[key];
+          else process.env[key] = value;
+        }
+      }
     },
   );
   await t.test(

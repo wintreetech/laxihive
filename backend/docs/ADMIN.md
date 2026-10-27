@@ -21,6 +21,8 @@ The selected address was not registered during implementation; no account/passwo
 
 ## Panel sections
 
+The main and administration sidebars have persistent collapse controls. Mobile navigation uses a keyboard-accessible drawer. Pending payment recovery is the evidence-review queue; see the [launch upgrade guide](LAUNCH_UPGRADE.md) for its two-administrator workflow. Customer email verification can be optional, while every administrator must still be verified.
+
 The existing `/admin` application has Dashboard, Users, Wallets & coins, Wallet transactions, Games, Game pricing, Trials & sessions, Premium expansions, Coin store settings, Payments, Analytics, Audit logs, Admin users & permissions, and Site settings.
 
 Lists use real database values, search, filters and pages of 25 rows. User details show profile progress, wallet/debt, recent payments and sessions, achievements, permanent access and ledger activity. Historical detail lists are bounded; use the paginated central lists for larger histories.

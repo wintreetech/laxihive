@@ -2,6 +2,10 @@
   base = "frontend"
   command = "npm run build"
   publish = "dist"
+[build.environment]
+  NODE_VERSION = "24"
+  VITE_API_URL = "/api"
+  API_PROXY_TARGET = "https://laxihive.onrender.com"
 [[redirects]]
   from = "/*"
   to = "/index.html"

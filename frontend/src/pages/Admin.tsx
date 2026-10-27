@@ -1,7 +1,40 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { api, useAuth, useToast, money, number } from "../lib/api";
+import {
+  api,
+  useAuth,
+  useToast,
+  money,
+  number,
+  readLocal,
+  writeLocal,
+} from "../lib/api";
+import {
+  LayoutDashboard,
+  Users,
+  Wallet,
+  ReceiptText,
+  Gamepad2,
+  Tags,
+  Timer,
+  Layers3,
+  ShoppingBag,
+  CreditCard,
+  ClipboardCheck,
+  ChartNoAxesCombined,
+  ScrollText,
+  ShieldCheck,
+  Settings,
+  PanelLeftClose,
+  PanelLeftOpen,
+  type LucideIcon,
+} from "lucide-react";
+import {
+  SettlementProposal,
+  SettlementDecision,
+  GatewayVerification,
+} from "../components/SettlementReview";
 import { PageTitle, Loading, ErrorState, Empty } from "../components/UI";
 import {
   PricingEditor,
@@ -22,11 +55,29 @@ const sections = [
   ["expansions", "Premium expansions"],
   ["store", "Coin store settings"],
   ["payments", "Payments"],
+  ["settlement-reviews", "Pending payment recovery"],
   ["analytics", "Analytics"],
   ["audit-logs", "Audit logs"],
   ["admins", "Admin users & permissions"],
   ["settings", "Site settings"],
 ];
+const sectionIcons: Record<string, LucideIcon> = {
+  overview: LayoutDashboard,
+  users: Users,
+  wallet: Wallet,
+  transactions: ReceiptText,
+  games: Gamepad2,
+  "game-pricing": Tags,
+  sessions: Timer,
+  expansions: Layers3,
+  store: ShoppingBag,
+  payments: CreditCard,
+  "settlement-reviews": ClipboardCheck,
+  analytics: ChartNoAxesCombined,
+  "audit-logs": ScrollText,
+  admins: ShieldCheck,
+  settings: Settings,
+};
 export default function Admin() {
   const { user, loading } = useAuth(),
     q = useQueryClient(),
@@ -38,7 +89,10 @@ export default function Admin() {
     [page, setPage] = useState(1),
     [selected, setSelected] = useState(""),
     [busy, setBusy] = useState(false);
-  const allowed = user?.role === "ADMIN";
+  const [navCollapsed, setNavCollapsed] = useState(() =>
+    readLocal("lexi-admin-nav-collapsed", false),
+  );
+  const allowed = user?.role === "ADMIN" && user.verified;
   const overview = useQuery({
     queryKey: ["admin-overview"],
     queryFn: () => api("/admin/overview"),
@@ -72,6 +126,7 @@ export default function Admin() {
     "transactions",
     "sessions",
     "payments",
+    "settlement-reviews",
     "audit-logs",
   ].includes(tab);
   const list = useQuery({
@@ -96,6 +151,7 @@ export default function Admin() {
         "transactions",
         "sessions",
         "payments",
+        "settlement-reviews",
         "audit-logs",
         "games",
         "expansions",
@@ -141,17 +197,49 @@ export default function Admin() {
         title="Manage your platform."
         description="Published pricing, wallet accounting and customer activity from your database."
       />
-      <div className="admin-workspace">
-        <nav className="admin-navigation" aria-label="Administration sections">
-          {sections.map(([id, label]) => (
-            <button
-              key={id}
-              className={tab === id ? "active" : ""}
-              onClick={() => go(id)}
-            >
-              {label}
-            </button>
-          ))}
+      <div className={`admin-workspace ${navCollapsed ? "is-collapsed" : ""}`}>
+        <nav
+          id="admin-sections"
+          className="admin-navigation"
+          aria-label="Administration sections"
+        >
+          <button
+            className="admin-nav-toggle"
+            aria-label={
+              navCollapsed
+                ? "Expand administration menu"
+                : "Collapse administration menu"
+            }
+            aria-controls="admin-sections"
+            aria-expanded={!navCollapsed}
+            onClick={() => {
+              setNavCollapsed(!navCollapsed);
+              writeLocal("lexi-admin-nav-collapsed", !navCollapsed);
+            }}
+          >
+            {navCollapsed ? (
+              <PanelLeftOpen size={20} />
+            ) : (
+              <PanelLeftClose size={20} />
+            )}
+            <span>Sections</span>
+          </button>
+          {sections.map(([id, label]) => {
+            const Icon = sectionIcons[id];
+            return (
+              <button
+                key={id}
+                className={tab === id ? "active" : ""}
+                onClick={() => go(id)}
+                aria-label={label}
+                title={navCollapsed ? label : undefined}
+                aria-current={tab === id ? "page" : undefined}
+              >
+                <Icon size={18} />
+                <span>{label}</span>
+              </button>
+            );
+          })}
         </nav>
         <div className="admin-content">
           {paginated && (
@@ -194,26 +282,28 @@ export default function Admin() {
                             "refunded",
                             "disputed",
                           ]
-                        : tab === "sessions"
-                          ? [
-                              "CREATED",
-                              "TRIAL_ACTIVE",
-                              "PAYMENT_REQUIRED",
-                              "PAYMENT_AUTHORIZED",
-                              "ACTIVE",
-                              "COMPLETED",
-                              "REFUNDED",
-                              "ABANDONED",
-                            ]
-                          : [
-                              "purchased",
-                              "earned",
-                              "spent",
-                              "game_session_charge",
-                              "game_session_refund",
-                              "admin",
-                              "refund",
-                            ]
+                        : tab === "settlement-reviews"
+                          ? ["PENDING", "APPROVED", "REJECTED", "SUPERSEDED"]
+                          : tab === "sessions"
+                            ? [
+                                "CREATED",
+                                "TRIAL_ACTIVE",
+                                "PAYMENT_REQUIRED",
+                                "PAYMENT_AUTHORIZED",
+                                "ACTIVE",
+                                "COMPLETED",
+                                "REFUNDED",
+                                "ABANDONED",
+                              ]
+                            : [
+                                "purchased",
+                                "earned",
+                                "spent",
+                                "game_session_charge",
+                                "game_session_refund",
+                                "admin",
+                                "refund",
+                              ]
                     ).map((s) => (
                       <option key={s}>{s}</option>
                     ))}
@@ -238,7 +328,22 @@ export default function Admin() {
                 <div className="admin-metrics">
                   {[
                     ["Registered users", overview.data.users],
+                    ["New in 7 days", overview.data.newUsers],
                     ["Active in 7 days", overview.data.activeUsers],
+                    ["Visible games", overview.data.gamesAvailable],
+                    ["Pending confirmations", overview.data.pendingPayments],
+                    [
+                      "Purchased coins",
+                      overview.data.coinKinds?.find(
+                        (r: any) => r.kind === "purchased",
+                      )?._sum.amount ?? 0,
+                    ],
+                    [
+                      "Net admin adjustments",
+                      overview.data.coinKinds?.find(
+                        (r: any) => r.kind === "admin",
+                      )?._sum.amount ?? 0,
+                    ],
                     ["Game launches", overview.data.sessions],
                     ["Completed games", overview.data.completed],
                     ["Verified purchases", overview.data.purchases],
@@ -611,7 +716,8 @@ export default function Admin() {
             <section className="panel">
               <h2>Coin store settings</h2>
               <p>
-                Independent USD/EUR rates. Merchant-enabled currencies:{" "}
+                Review independent prices or enable base-currency pricing using
+                cached ECB reference rates. Merchant-enabled currencies:{" "}
                 {pricing.data.currencies.join(", ")}. Purchase limits below use
                 cents.
               </p>
@@ -627,9 +733,29 @@ export default function Admin() {
                     coinsPerDollar: Number(d.coinsPerDollar),
                     coinsPerEuro: Number(d.coinsPerEuro),
                     enabled: d.enabled === "on",
+                    pricingPolicy: d.pricingPolicy,
                   });
                 }}
               >
+                <label>
+                  Pricing policy
+                  <select
+                    name="pricingPolicy"
+                    defaultValue={pricing.data.pricingPolicy || "INDEPENDENT"}
+                  >
+                    <option value="INDEPENDENT">
+                      Independent EUR and USD prices
+                    </option>
+                    <option value="FX_BASED">
+                      Convert from base currency using ECB rates
+                    </option>
+                  </select>
+                </label>
+                <p>
+                  Base currency: {pricing.data.baseCurrency}. Saving this policy
+                  changes future quotes only; accepted payment amounts stay
+                  fixed.
+                </p>
                 {[
                   ["minCents", "Minimum in cents"],
                   ["maxCents", "Maximum in cents"],
@@ -665,37 +791,65 @@ export default function Admin() {
           {tab === "payments" && (
             <>
               <p>
-                Verification queries the provider. It never manually marks an
-                order paid.
+                Query the provider to recover a missing callback. If
+                authoritative merchant/bank settlement evidence is available,
+                submit it for independent review by a second verified
+                administrator. Goodwill adjustments belong under Wallets &amp;
+                coins.
               </p>
               <Records
                 items={rows}
                 columns={paymentColumns}
                 action={(r) => (
                   <>
-                    <button
-                      className="button secondary"
-                      disabled={
-                        busy ||
-                        !list.data?.inquiryConfigured ||
-                        !r.intentId ||
-                        r.provider !== "transactworld"
-                      }
-                      onClick={() =>
-                        save(
-                          "/admin/payments/" + r.id + "/reconcile",
-                          {},
-                          "POST",
-                        )
-                      }
-                    >
-                      Verify with gateway
-                    </button>
+                    <GatewayVerification
+                      payment={r}
+                      configured={!!list.data?.inquiryConfigured}
+                      onSaved={() => {
+                        void q.invalidateQueries();
+                      }}
+                    />
                     <details>
                       <summary>Sanitized callbacks</summary>
                       <pre>{JSON.stringify(r.notifications, null, 2)}</pre>
                     </details>
+                    <SettlementProposal
+                      payment={r}
+                      onSaved={() => {
+                        void q.invalidateQueries();
+                      }}
+                    />
                   </>
+                )}
+              />
+            </>
+          )}
+          {tab === "settlement-reviews" && (
+            <>
+              <p>
+                A manual settlement requires authoritative merchant/bank
+                evidence, password confirmation and two different verified
+                administrators. Goodwill credits belong under Wallets &amp;
+                coins.
+              </p>
+              <Records
+                items={rows}
+                columns={[
+                  ["Order", (r) => r.paymentId],
+                  ["Customer", (r) => r.payment.user?.email],
+                  ["Amount", (r) => money(r.payment.cents, r.payment.currency)],
+                  ["Status", (r) => r.status],
+                  ["External reference", (r) => r.externalReference],
+                  ["Initiated", (r) => date(r.createdAt)],
+                ]}
+                action={(r) => (
+                  <SettlementDecision
+                    review={r}
+                    userId={user.id}
+                    onSaved={() => {
+                      void q.invalidateQueries();
+                    }}
+                  />
                 )}
               />
             </>
@@ -738,6 +892,18 @@ export default function Admin() {
                 <p>
                   Supply a complete email address. Account-verification SMTP is
                   configured separately.
+                </p>
+                <p>
+                  Mandatory customer verification:{" "}
+                  {settings.data.requireEmailVerification
+                    ? "enabled"
+                    : "temporarily disabled"}
+                  . Email provider:{" "}
+                  {settings.data.smtpConfigured
+                    ? "configured"
+                    : "not configured"}
+                  . Payment maintenance: {settings.data.maintenanceMode}.
+                  Administrator verification remains mandatory.
                 </p>
                 <form
                   className="form admin-form"

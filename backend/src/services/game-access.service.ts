@@ -4,6 +4,7 @@ import { z } from "zod";
 import { db, atomic, assert } from "../config/database.js";
 import { ledger } from "./wallet.service.js";
 import { accessTypes } from "../../shared/access.js";
+import { customerEmailAllowed } from "../config/account-policy.js";
 import { campaignSeed, dailySeed, timeLimit } from "../../shared/engine.js";
 
 export const accessSchema = z
@@ -239,7 +240,11 @@ export async function authorizeSession(
       );
       return sessionView(s);
     }
-    assert(verified, 403, "Verify your email before spending coins.");
+    assert(
+      customerEmailAllowed(verified),
+      403,
+      "Verify your email before spending coins.",
+    );
     assert(
       s.coinPrice > 0 &&
         [

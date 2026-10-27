@@ -194,6 +194,7 @@ model CoinPricingConfig {
   coinsPerEuro Int @default(0)
   enabled Boolean @default(false)
   version Int @default(1)
+  pricingPolicy String @default("INDEPENDENT")
   updatedAt DateTime @updatedAt
 }
 model CoinQuote {
@@ -204,6 +205,12 @@ model CoinQuote {
   currency String @default("usd")
   coins Int
   pricingVersion Int
+  baseCurrency String?
+  baseCents Int?
+  fxRate String?
+  fxDate DateTime?
+  fxProvider String?
+  pricingPolicy String?
   expiresAt DateTime
   payment Payment?
 }
@@ -229,9 +236,53 @@ model Payment {
   updatedAt DateTime @updatedAt
   gatewayStatus String?
   gatewayVerifiedAt DateTime?
+  fulfillmentSource String?
+  manuallyVerifiedAt DateTime?
+  settlementRevision Int @default(0)
+  baseCurrency String?
+  baseCents Int?
+  fxRate String?
+  fxDate DateTime?
+  fxProvider String?
+  pricingPolicy String?
+  settlementReviews SettlementReview[]
   notifications GatewayNotification[]
   purchase Purchase?
   @@index([userId,createdAt])
+}
+model SettlementReview {
+  id String @id @map("_id")
+  paymentId String
+  payment Payment @relation(fields:[paymentId], references:[id])
+  initiatedBy String
+  approvedBy String?
+  status String @default("PENDING")
+  externalReference String
+  evidenceKey String
+  evidenceReference String
+  explanation String
+  decisionReason String?
+  paymentSnapshot Json
+  payloadHash String
+  createdAt DateTime @default(now())
+  reviewedAt DateTime?
+  @@index([paymentId,createdAt])
+  @@index([status,createdAt])
+}
+model SettlementClaim {
+  id String @id @map("_id")
+  paymentId String
+  reviewId String
+  createdAt DateTime @default(now())
+}
+model FxRate {
+  id String @id @map("_id")
+  base String
+  quote String
+  rate String
+  asOf DateTime
+  fetchedAt DateTime
+  provider String
 }
 model GatewayNotification {
   id String @id @map("_id")

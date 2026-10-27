@@ -6,11 +6,18 @@ import { submitGatewayForm } from "../lib/checkout";
 import { SecureNote } from "./UI";
 import { EmailVerification } from "./EmailVerification";
 import type { Pricing, PurchaseCurrency } from "../../../backend/shared/rules";
+import { fxCoinAmount } from "../../../backend/shared/money";
 type StoreConfig = Pricing & {
   paymentsAvailable: boolean;
+  paymentsPaused?: boolean;
+  paymentUnavailableMessage?: string;
   testMode: boolean;
   provider?: string;
   currencies?: PurchaseCurrency[];
+  pricingPolicy?: string;
+  baseCurrency?: PurchaseCurrency;
+  fxRate?: { rate: string; asOf: string; provider: string } | null;
+  fxIssue?: string | null;
   sessionExamples?: { name: string; mode: string; coinPrice: number }[];
 };
 export function CoinSlider({
@@ -47,7 +54,20 @@ export function CoinSlider({
   );
   const rate =
     currency === "EUR" ? config?.coinsPerEuro : config?.coinsPerDollar;
-  const coins = config?.enabled && rate ? (amount * rate) / 100 : null;
+  const fxBased = config?.pricingPolicy === "FX_BASED";
+  const base = config?.baseCurrency || "EUR";
+  const conversionRate = currency === base ? "1" : config?.fxRate?.rate;
+  const baseCoinRate =
+    base === "EUR" ? config?.coinsPerEuro : config?.coinsPerDollar;
+  const coins = !config?.enabled
+    ? null
+    : fxBased
+      ? conversionRate && baseCoinRate
+        ? fxCoinAmount(amount, baseCoinRate, conversionRate)
+        : null
+      : rate
+        ? (amount * rate) / 100
+        : null;
   function select(v: number) {
     setCents(v);
     setQuote(null);
@@ -56,6 +76,13 @@ export function CoinSlider({
   async function purchase() {
     if (compact) {
       navigate(`/store?amount=${amount}&currency=${currency}`);
+      return;
+    }
+    if (!config?.paymentsAvailable) {
+      setError(
+        config?.paymentUnavailableMessage ||
+          "Coin purchases are temporarily unavailable.",
+      );
       return;
     }
     if (!currencyAvailable) {
@@ -102,10 +129,10 @@ export function CoinSlider({
           <ShieldCheck size={13} />
           {compact
             ? "YOUR CHOICE"
-            : config?.provider === "transactworld"
-              ? "TRANSACTWORLD"
+            : config?.paymentsPaused
+              ? "PURCHASES COMING SOON"
               : config?.testMode
-                ? "STRIPE TEST MODE"
+                ? "TEST CHECKOUT"
                 : "SECURE CHECKOUT"}
         </span>
       </div>
@@ -239,6 +266,14 @@ export function CoinSlider({
             Coins have no cash value.{" "}
             <Link to="/virtual-currency">Read the currency policy.</Link>
           </p>
+          {quote.fxDate && quote.fxProvider !== "BASE_CURRENCY" && (
+            <p>
+              Reference rate: 1 {quote.baseCurrency?.toUpperCase()} ={" "}
+              {quote.fxRate} {quote.currency.toUpperCase()} ·{" "}
+              {new Date(quote.fxDate).toLocaleDateString()}. This accepted quote
+              stays fixed until expiry.
+            </p>
+          )}
         </div>
       )}
       {error && (
@@ -251,38 +286,45 @@ export function CoinSlider({
         onClick={purchase}
         disabled={
           busy ||
+          (!compact && !config?.paymentsAvailable) ||
           (!compact && !currencyAvailable) ||
-          (!compact && user && !user.verified) ||
           (!compact &&
             user &&
-            (!config?.enabled || !rate || !config?.paymentsAvailable))
+            user.emailVerificationRequired !== false &&
+            !user.verified) ||
+          (!compact &&
+            user &&
+            (!config?.enabled || coins === null || !config?.paymentsAvailable))
         }
       >
         {busy
           ? "Connecting securely…"
           : compact
             ? "Explore the coin store"
-            : quote
-              ? `Continue to ${config?.provider === "transactworld" ? "Transactworld" : "Stripe"} — ${money(amount, currency)}`
-              : user
-                ? `Review coins — ${money(amount, currency)}`
-                : "Sign in to buy coins"}
+            : config?.paymentsPaused
+              ? "Purchases coming soon"
+              : quote
+                ? `Continue to secure checkout — ${money(amount, currency)}`
+                : user
+                  ? `Review coins — ${money(amount, currency)}`
+                  : "Sign in to buy coins"}
         <ArrowUpRight size={17} />
       </button>
       {!compact && (!config?.paymentsAvailable || !config?.enabled) && (
-        <p className="availability-note">
-          Checkout is temporarily unavailable. You can browse prices in USD and
-          EUR while payments are being set up.
+        <p className="availability-note" role="status">
+          {config?.paymentUnavailableMessage ||
+            "Checkout is temporarily unavailable. You can browse prices in USD and EUR while payments are being set up."}
         </p>
       )}
-      <SecureNote
-        currency={currency}
-        provider={
-          config?.provider === "transactworld"
-            ? "Transactworld"
-            : "payment provider"
-        }
-      />
+      {fxBased && (
+        <p className="availability-note">
+          {coins === null
+            ? config?.fxIssue ||
+              "Exchange-rate pricing is temporarily unavailable."
+            : `Prices use ${base} as the base currency. ${currency === base ? "No currency conversion applies." : `ECB reference rate dated ${new Date(config!.fxRate!.asOf).toLocaleDateString()}; the server confirms the final whole-coin quote.`}`}
+        </p>
+      )}
+      <SecureNote currency={currency} />
     </div>
   );
 }

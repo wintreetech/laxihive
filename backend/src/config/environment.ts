@@ -4,6 +4,25 @@ export function validateEnvironment(env = process.env) {
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
+    REQUIRE_EMAIL_VERIFICATION: z.enum(["true", "false"]).default("true"),
+    PAYMENTS_ENABLED: z.enum(["true", "false"]).default("false"),
+    COIN_BASE_CURRENCY: z.enum(["EUR", "USD"]).default("EUR"),
+    FX_PROVIDER: z.enum(["FRANKFURTER_ECB"]).optional(),
+    FX_RATE_CACHE_TTL_SECONDS: z.coerce
+      .number()
+      .int()
+      .min(60)
+      .max(86400)
+      .default(3600),
+    FX_MAX_RATE_AGE_SECONDS: z.coerce
+      .number()
+      .int()
+      .min(86400)
+      .max(1209600)
+      .default(604800),
+    PAYMENT_MAINTENANCE_MODE: z
+      .enum(["interval", "scheduled"])
+      .default("interval"),
     DATABASE_URL: z.string().regex(/^mongodb(?:\+srv)?:\/\//),
     APP_ORIGIN: z.url(),
     SESSION_SECRET: z.string().min(32),

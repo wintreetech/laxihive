@@ -6,6 +6,7 @@ import { ErrorBoundary, Loading } from "./components/UI";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Catalog from "./pages/Catalog";
+import policyIndex from "./content/policy-index.json";
 const Play = lazy(() => import("./pages/Play"));
 const Daily = lazy(() =>
   import("./pages/Play").then((m) => ({ default: m.Daily })),
@@ -34,6 +35,7 @@ const PurchaseStatus = lazy(() =>
 const Leaderboards = lazy(() => import("./pages/Leaderboards"));
 const Admin = lazy(() => import("./pages/Admin"));
 const Info = lazy(() => import("./pages/Info"));
+const Policy = lazy(() => import("./pages/Policy"));
 const client = new QueryClient({
   defaultOptions: {
     queries: { retry: 1, refetchOnWindowFocus: false, staleTime: 30000 },
@@ -92,6 +94,10 @@ export default function App() {
                       element={<Auth mode="verify" />}
                     />
                     <Route path="admin" element={<Admin />} />
+                    <Route path="policies" element={<Policy />} />
+                    {policyIndex.map((policy) => (
+                      <Route key={policy.path} path={policy.path} element={<Policy />} />
+                    ))}
                     <Route path="*" element={<Info />} />
                   </Route>
                 </Routes>

@@ -10,6 +10,7 @@ import {
   gatewaySetupIssues,
   verifyHostedResponse,
   gatewayConfig,
+  gatewayInquiryAvailable,
   type TransactworldConfig,
 } from "../src/services/transactworld.service.js";
 const config: TransactworldConfig = {
@@ -219,7 +220,7 @@ test("Local hosted checkout is explicit and production ignores the development s
   assert.equal(production.paymentMode, "CC");
 });
 
-test("Production requires independent Inquiry and rejects mismatched gateway origins", (t) => {
+test("Production supports automatic Inquiry authentication and rejects mismatched gateway origins", (t) => {
   const before = process.env.NODE_ENV;
   t.after(() => {
     if (before === undefined) delete process.env.NODE_ENV;
@@ -234,8 +235,13 @@ test("Production requires independent Inquiry and rejects mismatched gateway ori
     notificationBase: "https://api.example.com/notify/",
     authToken: "",
   };
-  assert.equal(gatewayReady(live), false);
-  assert.ok(gatewaySetupIssues(live).some((i) => i.includes("TW_AUTH_TOKEN")));
+  assert.equal(gatewayReady(live), true);
+  assert.equal(gatewayInquiryAvailable(live), true);
+  assert.equal(gatewayInquiryAvailable({ ...live, workingKey: "" }), false);
+  assert.equal(
+    gatewaySetupIssues(live).some((i) => i.includes("TW_AUTH_TOKEN")),
+    false,
+  );
   assert.equal(
     gatewayReady({ ...live, authToken: "unit-inquiry-token" }),
     true,

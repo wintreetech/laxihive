@@ -175,7 +175,7 @@ export default function Dashboard({ profile = false }: { profile?: boolean }) {
           </div>
         </div>
       )}
-      {!user.verified && (
+      {user.emailVerificationRequired !== false && !user.verified && (
         <div className="verification-banner">
           <ShieldCheck size={17} />
           <p>
@@ -605,11 +605,13 @@ export function Settings() {
               <p>
                 {user.verified
                   ? "Email verified"
-                  : "Verification is still waiting"}
+                  : user.emailVerificationRequired === false
+                    ? "Email not verified · confirmation is optional"
+                    : "Verification is still waiting"}
               </p>
             </div>
           </div>
-          <EmailVerification />
+          <EmailVerification optional />
           <form className="form password-change" onSubmit={password}>
             <label>
               Current password

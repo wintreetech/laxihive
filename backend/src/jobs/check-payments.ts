@@ -36,7 +36,7 @@ try {
     `Hosted card request: paymentType=DB, paymentMode=${config.paymentMode}, paymentBrand=${config.paymentBrand}; account ID omitted.`,
   );
   console.log(
-    `Hosted checkout: working-key checksum; inquiry API: ${config.authToken ? "configured" : "optional, not configured"}.`,
+    `Hosted checkout: working-key checksum; inquiry API: ${config.authToken ? "manual token override" : "automatic merchant authentication in production"}.`,
   );
   if (config.allowLocalCheckout)
     console.log(

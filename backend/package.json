@@ -21,13 +21,16 @@
     "pretest": "node scripts/generate-client.mjs",
     "test": "tsx --test shared/*.test.ts test/*.test.ts",
     "pretest:integration": "node scripts/generate-client.mjs && node scripts/test-database.mjs",
-    "test:integration": "tsx --test test/integration.ts test/billing.integration.ts",
+    "test:integration": "tsx --test test/integration.ts test/billing.integration.ts test/launch.integration.ts",
     "db:start": "node scripts/database.mjs",
     "db:backup": "node scripts/backup.mjs",
     "db:check": "node scripts/check-database.mjs",
     "db:resolve-atlas": "node scripts/resolve-atlas.mjs",
     "security:scan": "node scripts/security-scan.mjs",
-    "admin:provision": "tsx --env-file-if-exists=.env src/jobs/provision-admin.ts"
+    "admin:provision": "tsx --env-file-if-exists=.env src/jobs/provision-admin.ts",
+    "maintenance:run": "tsx --env-file-if-exists=.env src/jobs/maintenance.ts",
+    "db:migrate:launch": "tsx --env-file-if-exists=.env prisma/launch-migration.ts --apply",
+    "db:verify-preservation": "node scripts/verify-preservation.mjs"
   },
   "dependencies": {
     "@prisma/client": "6.12.0",

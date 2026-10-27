@@ -17,14 +17,18 @@ import { useState } from "react";
 import type { Game } from "../../../backend/shared/catalog";
 import { accessLabel } from "../../../backend/shared/access";
 import { readLocal, writeLocal } from "../lib/api";
-export function Logo() {
+export function Logo({ compact = false }: { compact?: boolean }) {
   return (
     <Link to="/" className="logo" aria-label="LexiHive home">
       <span className="logo-icon">
         <Hexagon size={30} strokeWidth={2.2} />
         <span />
       </span>
-      lexi<span>hive</span>
+      {!compact && (
+        <>
+          lexi<span>hive</span>
+        </>
+      )}
       <i />
     </Link>
   );

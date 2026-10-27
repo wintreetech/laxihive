@@ -1,27 +1,23 @@
-﻿# Transactworld Standard Checkout
+# Transactworld Standard Checkout
 
 The app uses the Standard Checkout form flow supplied in the merchant guide: initialize an order on the backend, generate the MD5 checksum there, then POST a hidden browser form to `/transaction/Checkout`. Card details are entered on Transactworld's page.
 
 ## Current local setup
 
-The live merchant credentials remain in ignored `backend/.env`. The app prices USD and EUR separately at 100 coins per unit, with a 5-500 purchase range. The new merchant's actual EUR customer-entry page was opened successfully; USD returned error 30101 before displaying the form. This installation therefore enables EUR checkout and defaults the store to EUR. USD prices remain available for viewing, and USD checkout is guarded until its merchant route is confirmed.
+Checkout is paused with PAYMENTS_ENABLED=false while this website awaits its own merchant credentials. The app supports USD and EUR; the merchant must approve each currency. Enter MEMBER_ID and WORKING_KEY; verification tokens are generated automatically in production.
 
 The hosted request includes `paymentType=DB`, `paymentMode=CC`, and `paymentBrand=VISA`. It does not require or send an account ID. Every purchase receives its own unique transaction ID. Legacy `1` / `VISAs` configuration is normalized to the documented `CC` / `VISA` values.
 
-`TW_AUTH_TOKEN` is **required for production checkout and independent fulfillment**. It belongs to the documented Backoffice Inquiry API. Development/test may open hosted checkout and exercise a full-status signed return without it; that fallback is disabled in production.
+`TW_AUTH_TOKEN` is an optional manual override. Production obtains a one-hour token from the authentication endpoint using the member ID and working key, caches it in memory for 55 minutes and renews it early. Tokens are never exposed to the browser or saved in .env.
 
 ```dotenv
-PAYMENT_PROVIDER=transactworld
 TW_ENVIRONMENT=live
-PAYMENTS_ENABLED=true
+PAYMENTS_ENABLED=false
 PAYMENT_BRAND=VISA
 PAYMENT_MODE=CC
-TW_SUPPORTED_CURRENCIES=EUR
-TW_AUTH_TOKEN=
+TW_SUPPORTED_CURRENCIES=USD,EUR
 TW_ALLOW_LOCAL_CHECKOUT=true
 PUBLIC_API_URL=http://localhost:4000
-MERCHANT_REDIRECT_URL=
-NOTIFICATION_URL=
 ```
 
 `TW_ALLOW_LOCAL_CHECKOUT` permits localhost callbacks only outside production. A customer's browser can POST the return to the same laptop's localhost. Transactworld's servers cannot deliver notifications to that address. This supports checking the hosted page locally; it does not establish that the merchant will accept every local address or IP. The development `IP` override is used only with this explicit local setting. Production always uses the request IP.
@@ -40,19 +36,21 @@ Notification: MD5(paymentId|merchantTransactionId|amount|shortStatus|workingKey)
 
 The return route verifies the **full status** checksum, exact order reference, amount, currency and provider payment ID. In development/test, a signed capture can fulfill an order without Inquiry. Production requires authenticated Inquiry confirmation; a browser return alone cannot fulfill it. Preauthorization, pending and unknown statuses never credit coins. Concurrent delivery uses the same transactional ledger reference.
 
-A short notification `Y` alone does not prove capture. A signed notification binds the gateway payment ID and stores sanitized fields. With an Inquiry token, the server independently verifies capture, transaction references, amount and currency. This path does not depend on keeping the browser open. Production checkout remains unavailable without this credential.
+A short notification `Y` alone does not prove capture. A signed notification binds the gateway payment ID and stores sanitized fields. In production the server automatically obtains an Inquiry token and independently verifies capture, transaction references, amount and currency. This path does not depend on keeping the browser open. Authentication or Inquiry failures leave payments pending without adding coins.
 
 ## Automatic recovery and remaining merchant dependencies
 
-Set an operational `TW_AUTH_TOKEN`, `NODE_ENV=production`, and public HTTPS return/notification routes before accepting production payments. `TW_ALLOW_LOCAL_CHECKOUT` is ignored in production. Optional `TW_GATEWAY_ORIGIN` must match the documented selected live/sandbox origin.
+The launch upgrade adds authenticated admin recovery with a provider ID from merchant records and independently approved settlement evidence. All successful providers/reviews call the same purchase-fulfillment operation. Manual settlement is labeled separately and does not fabricate gateway verification. See [the full workflow](LAUNCH_UPGRADE.md).
 
-The API starts maintenance automatically. `PAYMENT_RECONCILIATION_ENABLED=true` enables provider checks; `PAYMENT_RECONCILIATION_SECONDS=60` is the default interval (30–3600). Each batch checks up to 100 eligible orders from the last 30 days, oldest verification first. `npm.cmd run payments:reconcile` remains available. Verification failures retry later and never guess success.
+Set the website's merchant credentials, `NODE_ENV=production`, and public HTTPS return/notification routes. Confirm merchant API access before accepting customers. `TW_ALLOW_LOCAL_CHECKOUT` is ignored in production. Optional `TW_GATEWAY_ORIGIN` must match the documented selected live/sandbox origin.
+
+Local interval mode starts maintenance automatically. `PAYMENT_RECONCILIATION_ENABLED=true` enables provider checks; `PAYMENT_RECONCILIATION_SECONDS=60` is the default interval (30–3600). Each batch checks up to 100 eligible orders from the last 30 days, oldest verification first. In production, configure the separate Render cron from backend/render.yaml and select `PAYMENT_MAINTENANCE_MODE=scheduled`; it runs the one-shot maintenance job independently of web-service sleep. `npm.cmd run payments:reconcile` remains available. Verification failures retry later and never guess success.
 
 Orders with no provider payment ID after 24 hours are locally labeled abandoned, not paid. Late verified notifications can still settle them. If neither notification nor return supplies a provider ID, PID Inquiry cannot identify the payment: investigate its merchant transaction reference in the gateway dashboard/support. Merchant-ID Inquiry is documented but needs account/signing-contract confirmation before enabling another recovery variant.
 
-This installation has no Inquiry token, deployed public HTTPS callbacks or tested token-renewal credentials. Provider documentation describes short-lived authentication tokens. Supply operational authentication/renewal details before claiming unattended recovery. Refunds and chargebacks require authoritative cumulative amounts; unsigned totals never debit wallets. No cash-refund initiation UI was added. No real charge was made during this upgrade.
+Real merchant authentication and public callback delivery still need checking with this website's approved merchant account. Tests use mocked provider responses and an isolated MongoDB test database. No real charge was made. Refunds and chargebacks require authoritative cumulative amounts; unsigned totals never debit wallets.
 
-The provider's documented hashes do not include currency. The app compares the returned currency to the immutable quote; when Inquiry is configured it also checks the independent authenticated gateway response. Use Inquiry for independent amount/currency reconciliation and refunds/disputes. Unsigned refund totals are never used to debit a wallet. The working key is never included in the browser form.
+The provider's documented hashes do not include currency. The app compares the returned currency to the immutable quote; in production it also checks the independent authenticated gateway response. Use Inquiry for independent amount/currency reconciliation and refunds/disputes. Unsigned refund totals are never used to debit a wallet. The working key is never included in the browser form.
 
 ## Routes
 

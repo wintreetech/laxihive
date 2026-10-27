@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import type { Prisma, Payment } from "@prisma/client";
 import { assert } from "../config/database.js";
 import { walletChange } from "../../shared/rules.js";
 export async function ledger(
@@ -32,6 +32,40 @@ export async function ledger(
       kind,
       reference,
       description,
+    },
+  });
+}
+// All providers and reviewed settlements share the same exactly-once wallet operation.
+export async function fulfillCoinPurchase(
+  tx: Prisma.TransactionClient,
+  payment: Payment,
+  source: "GATEWAY" | "MANUAL_SETTLEMENT",
+) {
+  if (payment.credited) return;
+  await ledger(
+    tx,
+    payment.userId,
+    payment.coins,
+    "purchased",
+    payment.provider === "transactworld"
+      ? `payment:transactworld:${payment.id}`
+      : `payment:${payment.id}`,
+    `${source === "MANUAL_SETTLEMENT" ? "Reviewed settlement" : "Verified payment"} ${payment.currency.toUpperCase()} ${(payment.cents / 100).toFixed(2)}`,
+  );
+  await tx.purchase.upsert({
+    where: { paymentId: payment.id },
+    update: {},
+    create: { paymentId: payment.id },
+  });
+  await tx.payment.update({
+    where: { id: payment.id },
+    data: {
+      credited: true,
+      status: "paid",
+      fulfillmentSource: source,
+      ...(source === "MANUAL_SETTLEMENT"
+        ? { manuallyVerifiedAt: new Date() }
+        : {}),
     },
   });
 }

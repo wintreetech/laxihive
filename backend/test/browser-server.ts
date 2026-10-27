@@ -5,6 +5,7 @@ import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import express from "express";
 process.loadEnvFile(".env");
+process.env.REQUIRE_EMAIL_VERIFICATION = "true";
 assert.equal(
   process.env.LEXIHIVE_E2E_FIXTURE,
   "true",
@@ -87,7 +88,24 @@ for (const role of ["ADMIN", "USER"]) {
     );
 }
 const { createApp } = await import("../src/app.js");
+await db.user.create({
+  data: {
+    email: "reviewer@fixture.invalid",
+    displayName: "Independent reviewer fixture",
+    passwordHash: await hashPassword("browser fixture password"),
+    role: "ADMIN",
+    verifiedAt: new Date(),
+    profile: { create: {} },
+    wallet: { create: {} },
+  },
+});
 const app = express();
+app.post("/api/__fixture/account-policy", express.json(), (req, res) => {
+  assert.equal(req.get("X-Lexihive-Fixture"), "launch-policy-tests");
+  assert.equal(typeof req.body.required, "boolean");
+  process.env.REQUIRE_EMAIL_VERIFICATION = String(req.body.required);
+  res.json({ required: req.body.required });
+});
 app.get("/api/__fixture", (_req, res) =>
   res.json({ database: "lexihive_browser_test" }),
 );

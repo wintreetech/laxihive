@@ -5,15 +5,22 @@ import { post, useAuth } from "../lib/api";
 
 export function EmailVerification({
   returnTo = "/settings",
+  optional = false,
 }: {
   returnTo?: string;
+  optional?: boolean;
 }) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  if (!user || user.verified) return null;
+  if (
+    !user ||
+    user.verified ||
+    (!optional && user.emailVerificationRequired === false)
+  )
+    return null;
   async function send() {
     setBusy(true);
     setError("");
@@ -36,11 +43,15 @@ export function EmailVerification({
   return (
     <div className="email-verification">
       <strong>
-        <Mail size={16} /> Verify your email to continue
+        <Mail size={16} />{" "}
+        {user.emailVerificationRequired === false
+          ? "Verify your email (optional)"
+          : "Verify your email to continue"}
       </strong>
       <p>
-        Confirm your account email before purchasing coins or unlocking
-        expansions.
+        {user.emailVerificationRequired === false
+          ? "Email confirmation is optional during the initial launch. Your account can use available features without it."
+          : "Confirm your account email before purchasing coins or unlocking expansions."}
       </p>
       <button
         type="button"

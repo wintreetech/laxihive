@@ -40,7 +40,22 @@ admin.get("/overview", async (_req, res) => {
     db.walletTransaction.findMany({ orderBy: { createdAt: "desc" }, take: 20 }),
     db.payment.count({ where: { status: { in: ["failed", "disputed"] } } }),
   ]);
+  const [newUsers, pendingPayments, gamesAvailable, coinKinds, sessionStates] =
+    await Promise.all([
+      db.user.count({
+        where: { createdAt: { gte: new Date(Date.now() - 7 * 86400000) } },
+      }),
+      db.payment.count({ where: { status: { in: ["pending", "abandoned"] } } }),
+      db.game.count({ where: { visible: true } }),
+      db.walletTransaction.groupBy({ by: ["kind"], _sum: { amount: true } }),
+      db.gameSession.groupBy({ by: ["billingState"], _count: true }),
+    ]);
   res.json({
+    newUsers,
+    pendingPayments,
+    gamesAvailable,
+    coinKinds,
+    sessionStates,
     users,
     activeUsers,
     sessions,
@@ -64,6 +79,7 @@ export const pricingSchema = z
     coinsPerDollar: z.number().int().min(1).max(10000),
     coinsPerEuro: z.number().int().min(1).max(10000).optional(),
     enabled: z.boolean(),
+    pricingPolicy: z.enum(["INDEPENDENT", "FX_BASED"]).optional(),
   })
   .refine(
     (p) =>

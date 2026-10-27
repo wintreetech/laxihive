@@ -11,13 +11,94 @@ import {
 import { accessProposals } from "../../shared/access.js";
 import { games, expansionSlugs } from "../../shared/catalog.js";
 import { timeLimit } from "../../shared/engine.js";
-import { verifiedRevenueTotals } from "../services/reporting.service.js";
 import {
-  gatewayConfig,
+  verifiedRevenueTotals,
+  settlementRevenueReport,
+} from "../services/reporting.service.js";
+import {
+  proposeSettlement,
+  decideSettlement,
+} from "../services/settlement.service.js";
+import { rateLimit } from "express-rate-limit";
+import { requiresEmailVerification } from "../config/account-policy.js";
+import { fxSettings } from "../services/fx.service.js";
+import {
+  gatewayInquiryAvailable,
   gatewaySetupIssues,
   reconcileTransactworld,
 } from "../services/transactworld.service.js";
 export const management = Router();
+const settlementLimiter = rateLimit({
+  windowMs: 15 * 60000,
+  limit: 20,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+});
+management.get("/revenue-report", async (req, res) => {
+  const input = z
+    .object({ from: z.iso.date(), to: z.iso.date() })
+    .parse(req.query);
+  const from = new Date(input.from + "T00:00:00Z"),
+    to = new Date(input.to + "T00:00:00Z");
+  to.setUTCDate(to.getUTCDate() + 1);
+  assert(
+    to > from && to.getTime() - from.getTime() <= 366 * 86400000,
+    400,
+    "Choose an ordered date range of up to 366 days.",
+  );
+  res.json(await settlementRevenueReport(from, to));
+});
+management.get("/settlement-reviews", async (req, res) => {
+  const p = page(req.query);
+  const where = {
+    ...(p.status ? { status: p.status } : {}),
+    ...(p.search
+      ? {
+          OR: [
+            { externalReference: { contains: p.search } },
+            { paymentId: { contains: p.search } },
+          ],
+        }
+      : {}),
+  };
+  const [items, total] = await Promise.all([
+    db.settlementReview.findMany({
+      where,
+      include: {
+        payment: {
+          include: { user: { select: { email: true, displayName: true } } },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      take: p.take,
+      skip: p.skip,
+    }),
+    db.settlementReview.count({ where }),
+  ]);
+  res.json({ items, total, page: p.page });
+});
+management.post(
+  "/payments/:id/settlement-reviews",
+  settlementLimiter,
+  async (req, res) =>
+    res
+      .status(201)
+      .json(
+        await proposeSettlement(
+          req.auth!.userId,
+          String(req.params.id),
+          req.body,
+        ),
+      ),
+);
+management.post(
+  "/settlement-reviews/:id/decision",
+  settlementLimiter,
+  async (req, res) =>
+    res.json(
+      await decideSettlement(req.auth!.userId, String(req.params.id), req.body),
+    ),
+);
 function page(query: any) {
   const input = z
     .object({
@@ -445,6 +526,7 @@ management.get("/payments", async (req, res) => {
       where,
       include: {
         user: { select: { email: true, displayName: true } },
+        settlementReviews: { orderBy: { createdAt: "desc" }, take: 5 },
         notifications: {
           select: { signedFields: true, createdAt: true, processedAt: true },
           orderBy: { createdAt: "desc" },
@@ -461,22 +543,39 @@ management.get("/payments", async (req, res) => {
     items,
     total,
     page: p.page,
-    inquiryConfigured: !!gatewayConfig().authToken,
+    inquiryConfigured: gatewayInquiryAvailable(),
   });
 });
 management.post("/payments/:id/reconcile", async (req, res) => {
+  const input = z
+    .object({ gatewayPaymentId: z.string().trim().min(1).max(128).optional() })
+    .strict()
+    .parse(req.body);
   const payment = await db.payment.findUnique({
     where: { id: String(req.params.id) },
   });
   assert(payment, 404, "Payment not found.");
+  assert(
+    !payment.intentId ||
+      !input.gatewayPaymentId ||
+      payment.intentId === input.gatewayPaymentId,
+    409,
+    "The order already has a different gateway payment reference.",
+  );
   await db.adminAuditLog.create({
     data: {
       actorId: req.auth!.userId,
       action: "payment.reconcile.request",
-      detail: { paymentId: payment.id },
+      detail: {
+        paymentId: payment.id,
+        gatewayPaymentId: input.gatewayPaymentId || payment.intentId,
+      },
     },
   });
-  const result = await reconcileTransactworld(payment);
+  const result = await reconcileTransactworld({
+    ...payment,
+    intentId: payment.intentId || input.gatewayPaymentId || null,
+  });
   res.json({ status: result.status });
 });
 management.get("/audit-logs", async (req, res) => {
@@ -687,8 +786,11 @@ management.get("/settings", async (_req, res) =>
     settings: await db.siteSettings.findUnique({ where: { id: "global" } }),
     environmentSupportEmail: process.env.SUPPORT_EMAIL || "",
     paymentIssues: gatewaySetupIssues(),
-    inquiryConfigured: !!gatewayConfig().authToken,
+    inquiryConfigured: gatewayInquiryAvailable(),
     smtpConfigured: !!process.env.SMTP_HOST,
+    requireEmailVerification: requiresEmailVerification(),
+    maintenanceMode: process.env.PAYMENT_MAINTENANCE_MODE || "interval",
+    fx: fxSettings(),
     reconciliationEnabled:
       process.env.PAYMENT_RECONCILIATION_ENABLED !== "false",
   }),

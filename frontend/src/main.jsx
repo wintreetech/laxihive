@@ -8,6 +8,7 @@ import "@fontsource/space-grotesk/latin-600.css";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 import "./platform.css";
+import "./policies.css";
 import App from "./App.tsx";
 
 createRoot(document.getElementById("root")).render(

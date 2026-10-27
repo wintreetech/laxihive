@@ -53,6 +53,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user: session.data?.user ?? null,
+        requireEmailVerification:
+          session.data?.requireEmailVerification ?? true,
         loading: session.isPending,
         error: session.error,
         refresh,
@@ -60,7 +62,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           try {
             await post("/auth/logout");
             csrf = null;
-            q.setQueryData(["session"], { user: null, csrf: null });
+            q.setQueryData(["session"], {
+              user: null,
+              csrf: null,
+              requireEmailVerification:
+                session.data?.requireEmailVerification ?? true,
+            });
             q.removeQueries({
               predicate: (query) => query.queryKey[0] !== "session",
             });

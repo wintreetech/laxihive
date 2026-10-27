@@ -47,7 +47,7 @@ test("local email verification returns to EUR checkout and opens the hosted form
   await page.getByRole("button", { name: /Review coins/ }).click();
   await expect(page.locator(".quote-summary")).toContainText("€5.00");
   const submitted = page.waitForRequest(gateway);
-  await page.getByRole("button", { name: /Continue to Transactworld/ }).click();
+  await page.getByRole("button", { name: /Continue to secure checkout/ }).click();
   const request = await submitted;
   expect(request.method()).toBe("POST");
   const fields = new URLSearchParams(request.postData() || "");
