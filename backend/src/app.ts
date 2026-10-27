@@ -6,6 +6,7 @@ import { rateLimit } from "express-rate-limit";
 import { ZodError } from "zod";
 import type Stripe from "stripe";
 import { db, HttpError } from "./config/database.js";
+import { databaseDiagnostic } from "./config/database-diagnostics.js";
 import { auth } from "./routes/auth.routes.js";
 import {
   loadSession,
@@ -63,8 +64,23 @@ export function createApp(
   );
   app.use(express.json({ limit: "256kb" }), cookieParser());
   app.get("/api/health", async (_req, res) => {
-    await db.$runCommandRaw({ ping: 1 });
-    res.json({ status: "ok", service: "lexihive-backend" });
+    try {
+      await db.$runCommandRaw({ ping: 1 });
+      res.json({ status: "ok", service: "lexihive-backend" });
+    } catch (error) {
+      console.error(
+        JSON.stringify({
+          level: "error",
+          event: "database_health_failed",
+          ...databaseDiagnostic(error),
+        }),
+      );
+      res.status(503).json({
+        status: "unavailable",
+        service: "lexihive-backend",
+        message: "Database connection is temporarily unavailable.",
+      });
+    }
   });
   app.use(
     "/api",
@@ -148,6 +164,9 @@ export function createApp(
             path: req.path,
             error: err.name,
             code: err.code,
+            ...(typeof err.code === "string" && /^P\d{4}$/.test(err.code)
+              ? { database: databaseDiagnostic(err) }
+              : {}),
           }),
         );
       res.status(status).json({

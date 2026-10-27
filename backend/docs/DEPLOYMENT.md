@@ -2,9 +2,30 @@
 
 # Deployment and owner configuration
 
+## Current Render services and custom domain
+
+The owner confirmed both services are on Render:
+
+| Purpose | Service | Address |
+| --- | --- | --- |
+| Frontend | laxihive | https://laxihive.onrender.com, becoming https://lexihive.com |
+| Backend | laxihive-backend | https://laxihive-backend.onrender.com |
+
+1. In the frontend service's Settings > Custom Domains, add lexihive.com. Render adds www.lexihive.com as a redirect to the root domain.
+2. At the existing Namecheap DNS provider, replace parking/forwarding records for @ and www with A @ -> 216.24.57.1 and CNAME www -> laxihive.onrender.com. Remove conflicting A/AAAA/CNAME/URL-forwarding records for those two website hosts; preserve email MX/TXT records.
+3. Verify both domains and wait for HTTPS certificate issuance in Render before switching the backend's APP_ORIGIN.
+4. In the frontend Static Site's Redirects/Rewrites, put these Rewrite rules in this order: /api/* -> https://laxihive-backend.onrender.com/api/*, then /* -> /index.html. Keep VITE_API_URL=/api. These rules preserve same-origin requests and the existing HttpOnly SameSite=Lax login cookies.
+5. On the backend service, set APP_ORIGIN=https://lexihive.com and PUBLIC_API_URL=https://laxihive-backend.onrender.com. Keep NODE_ENV=production, REQUIRE_EMAIL_VERIFICATION=false and TW_ALLOW_LOCAL_CHECKOUT=false. Preserve database/session/merchant settings and the existing payment switch. Save and deploy. Rebuild the frontend if its VITE_API_URL value changed.
+6. Check https://laxihive-backend.onrender.com/api/health and https://lexihive.com/api/health, a direct policy-page reload, and signup/login. The earlier MongoDB access failure must be resolved independently; configuring the domain does not repair database connectivity.
+
+The prepared private environment file is backend/.local/deployment/laxihive-backend.corrected.env. It is ignored by Git and does not change Render until the owner imports/applies it. The old Netlify sections below describe an alternative host and are not the current deployment.
+
+References: https://render.com/docs/custom-domains, https://render.com/docs/configure-namecheap-dns, https://render.com/docs/redirects-rewrites.
+
+
 ## Current Render / Netlify launch
 
-See [LAUNCH_UPGRADE.md](LAUNCH_UPGRADE.md) for the current deployment checklist and backend/render.yaml. Render Node root is backend; build is `npm ci --include=dev && npm run db:generate && npm run build`; start is `npm run db:migrate && npm run db:seed && npm start`; health path is `/api/health`. The configured public origins are https://lexihive09.netlify.app and https://laxihive.onrender.com. Hosting was not deployed by the upgrade.
+See [LAUNCH_UPGRADE.md](LAUNCH_UPGRADE.md) for the current deployment checklist and backend/render.yaml. Render Node root is backend; build is `npm ci --include=dev && npm run db:generate && npm run build`; start is `npm run db:migrate && npm run db:seed && npm start`; health path is `/api/health`. The current frontend target is https://lexihive.com and the backend origin is https://laxihive-backend.onrender.com. Hosting was not deployed by the upgrade.
 
 Set `REQUIRE_EMAIL_VERIFICATION=false` for the temporary launch policy. Production startup then permits missing SMTP, but email-dependent actions fail safely until delivery is configured. Setting it to true requires production SMTP and restores the original paid-feature gates for unverified customers. Verified-admin requirements always remain. Backend credentials belong only in the backend host's environment.
 

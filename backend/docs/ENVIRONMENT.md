@@ -2,6 +2,14 @@
 
 `backend/.env.example` contains the application's core settings. `backend/.env` is private and must not be committed.
 
+## Render database health failures
+
+If `/api/health` fails while the exported connection URL works locally, the missing evidence is the database error from the backend host. In Render, select **laxihive-backend**, then **Connect > Outbound**. Add every displayed IP range in the correct MongoDB Atlas project's **Network Access > Add IP Address**; wait until the entries are active. These are the backend's outbound ranges, not the frontend's DNS address or your laptop's IP. Then redeploy and check `https://laxihive-backend.onrender.com/api/health`.
+
+The health endpoint returns 503 while database ping fails. Logs include a numeric provider code, a fixed `reason` and an action `hint` without printing database credentials or raw provider messages. Maintenance errors use the same safe diagnostic format. Typical reasons identify authentication, database permissions, network access, DNS, TLS or a missing database name; an unclassified P2010 is not sufficient evidence to choose between them.
+
+After deploying this version, run `npm run db:check` in the backend's Render Shell if it is available. It performs read-only native MongoDB and Prisma ping checks and reports each result independently. Share the `connectionChecks` or `database_health_failed` output for a remaining failure; do not share the connection string. If only one driver fails, investigate that driver's diagnostic instead of assuming the credentials are wrong. Keep TLS and certificate verification enabled.
+
 ## Pause and enable purchases
 
 `PAYMENTS_ENABLED=false` blocks all new checkouts on the server and disables the store purchase button. Games, existing wallet balances, policy pages and price browsing continue to work. Verified notifications for existing orders still process so a pause cannot strand an already completed payment.

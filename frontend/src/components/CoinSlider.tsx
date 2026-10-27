@@ -41,6 +41,10 @@ export function CoinSlider({
   const currency: PurchaseCurrency =
     selection ?? (currencies.includes("USD") ? "USD" : currencies[0] || "EUR");
   const currencyAvailable = currencies.includes(currency);
+  const availabilityMessage = config?.paymentsPaused
+    ? "Keep the good games going. Explore your favourite games while coin purchases are paused."
+    : config?.paymentUnavailableMessage ||
+      "Coin purchases are temporarily unavailable. Please check back later.";
   const [cents, setCents] = useState(Number(params.get("amount")) || 2500),
     [quote, setQuote] = useState<any>(null),
     [busy, setBusy] = useState(false),
@@ -79,10 +83,7 @@ export function CoinSlider({
       return;
     }
     if (!config?.paymentsAvailable) {
-      setError(
-        config?.paymentUnavailableMessage ||
-          "Coin purchases are temporarily unavailable.",
-      );
+      setError(availabilityMessage);
       return;
     }
     if (!currencyAvailable) {
@@ -312,8 +313,7 @@ export function CoinSlider({
       </button>
       {!compact && (!config?.paymentsAvailable || !config?.enabled) && (
         <p className="availability-note" role="status">
-          {config?.paymentUnavailableMessage ||
-            "Checkout is temporarily unavailable. You can browse prices in USD and EUR while payments are being set up."}
+          {availabilityMessage}
         </p>
       )}
       {fxBased && (
@@ -324,7 +324,7 @@ export function CoinSlider({
             : `Prices use ${base} as the base currency. ${currency === base ? "No currency conversion applies." : `ECB reference rate dated ${new Date(config!.fxRate!.asOf).toLocaleDateString()}; the server confirms the final whole-coin quote.`}`}
         </p>
       )}
-      <SecureNote currency={currency} />
+      {!config?.paymentsPaused && <SecureNote currency={currency} />}
     </div>
   );
 }

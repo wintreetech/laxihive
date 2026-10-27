@@ -2,7 +2,7 @@
 # before applying this blueprint. Applying it creates billable hosting resources.
 services:
   - type: web
-    name: laxihive
+    name: laxihive-backend
     runtime: node
     rootDir: backend
     buildCommand: npm ci --include=dev && npm run db:generate && npm run build
@@ -17,9 +17,9 @@ services:
       - key: REQUIRE_EMAIL_VERIFICATION
         value: "false"
       - key: APP_ORIGIN
-        value: https://lexihive09.netlify.app
+        value: https://lexihive.com
       - key: PUBLIC_API_URL
-        value: https://laxihive.onrender.com
+        value: https://laxihive-backend.onrender.com
       - key: PAYMENT_MAINTENANCE_MODE
         value: scheduled
   - type: cron

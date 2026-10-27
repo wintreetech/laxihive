@@ -1,4 +1,5 @@
 import { db } from "../config/database.js";
+import { databaseDiagnostic } from "../config/database-diagnostics.js";
 import {
   gatewayConfig,
   gatewayReady,
@@ -74,8 +75,14 @@ export async function maintenanceTick() {
 export function startMaintenance(seconds: number) {
   if (process.env.PAYMENT_MAINTENANCE_MODE === "scheduled") return () => {};
   const run = () =>
-    maintenanceTick().catch(() =>
-      console.error("Maintenance unavailable; retrying on the next interval."),
+    maintenanceTick().catch((error) =>
+      console.error(
+        JSON.stringify({
+          level: "error",
+          event: "maintenance_unavailable",
+          ...databaseDiagnostic(error),
+        }),
+      ),
     );
   const timer = setInterval(run, seconds * 1000);
   timer.unref();
