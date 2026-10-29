@@ -91,7 +91,7 @@ export default function Policy() {
         <h2 id="policy-company-title">{company.name}</h2>
         <p>Company No. {company.number} · Registered in {company.jurisdiction}</p>
         <address>{company.address}</address>
-        <p><a href={`mailto:${company.email}`}>{company.email}</a><br /><a href={company.phoneHref}>{company.phone}</a><br /><a href={company.websiteHref}>{company.website}</a></p>
+        <p><a href={`mailto:${company.email}`}>{company.email}</a><br /><a href={company.websiteHref}>{company.website}</a></p>
       </section>
     </div>
   );

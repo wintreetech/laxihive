@@ -433,7 +433,6 @@ export default function Layout() {
             <Link to="/help">Help center</Link>
             <Link to="/contact">Contact us</Link>
             <a href={`mailto:${company.email}`}>{company.email}</a>
-            <a href={company.phoneHref}>{company.phone}</a>
             <a href={company.websiteHref}>{company.website}</a>
           </nav>
           <div className="footer-bottom">

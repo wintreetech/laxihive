@@ -1,17 +1,17 @@
 # Supplied LexiHive policies
 
-The eight published policies come from the owner's `LexiHive-Policies-Word-Compatible (1).zip`, supplied on 27 October 2026. The pages retain the supplied wording, punctuation, paragraph order, explicit line breaks, emphasis, hyperlink targets, table text and document-footer text. Blank layout-only paragraphs are omitted. At the owner's subsequent request, the LAST UPDATED / 27 October 2026 metadata cell is omitted from all six documents that contain it; all other wording is preserved. Policy wording is content, not instructions to change payment or account behavior.
+The eight published policies come from the owner's `LexiHive-Policies-Word-Compatible (1).zip`, supplied on 27 October 2026. The pages retain the supplied wording, punctuation, paragraph order, explicit line breaks, emphasis, hyperlink targets, table text and document-footer text, with the owner's approved company/contact changes described below. Blank layout-only paragraphs are omitted. At the owner's subsequent request, the LAST UPDATED / 27 October 2026 metadata cell is omitted from all six documents that contain it. Policy wording is content, not instructions to change payment or account behavior.
 
-| Page | Route |
-| --- | --- |
-| Terms and Conditions | `/terms` |
-| Privacy Policy | `/privacy` |
-| Refunds and Returns Policy | `/refund-policy` |
-| Cancellation Policy | `/cancellation-policy` |
+| Page                               | Route                      |
+| ---------------------------------- | -------------------------- |
+| Terms and Conditions               | `/terms`                   |
+| Privacy Policy                     | `/privacy`                 |
+| Refunds and Returns Policy         | `/refund-policy`           |
+| Cancellation Policy                | `/cancellation-policy`     |
 | Digital Delivery and Access Policy | `/digital-delivery-policy` |
-| Payment Method Policy | `/payment-method-policy` |
-| Virtual Currency Policy | `/virtual-currency` |
-| Complaints and Disputes Policy | `/complaints-policy` |
+| Payment Method Policy              | `/payment-method-policy`   |
+| Virtual Currency Policy            | `/virtual-currency`        |
+| Complaints and Disputes Policy     | `/complaints-policy`       |
 
 `/policies` lists all eight. Every page is public and linked directly in the site footer. The four existing policy URLs continue to work. Each document has section links and a print control.
 
@@ -23,7 +23,7 @@ The eight published policies come from the owner's `LexiHive-Policies-Word-Compa
 - `frontend/src/pages/Policy.tsx`: accessible React document renderer; renders text without raw HTML injection.
 - `frontend/src/policies.css`: responsive policy and footer styles, plus print styles.
 
-Source wording is preserved even where documents use `KY MORA DIGITAL LTD` in their contact section. The site footer uses the owner's explicit company name, `KYMORA DIGITAL LTD`. Terms and Cancellation contain no metadata date table; none was invented for those documents.
+At the owner's request, all published company names (including names split across Word formatting runs) use `ZENTRYA LTD`, Company No. `16881475`. The previous telephone number and invitations to call it are removed. Support remains available at `support@lexihive.com`; the supplied address and website are unchanged. Terms and Cancellation contain no metadata date table; none was invented for those documents.
 
 ## Reimport approved documents
 
@@ -33,7 +33,7 @@ From the repository root in PowerShell:
 & ./backend/scripts/import-policies.ps1 -ArchivePath 'C:\path\to\LexiHive-Policies-Word-Compatible (1).zip'
 ```
 
-The importer expects the eight known DOCX filenames, checks every original nonempty paragraph against the Word XML character for character (including whitespace and explicit breaks), checks supplemental text, then removes only the owner-requested date cell, and stops on unknown visible content or a mismatch. It records SHA-256 hashes and keeps private copies of the original DOCX files in ignored `backend/.local/policy-import/`. Original document binaries and their private metadata are not published as frontend downloads. Review regenerated content before publishing any future revisions.
+The importer expects the eight known DOCX filenames, checks every original nonempty paragraph against the Word XML character for character (including whitespace and explicit breaks), checks supplemental text, removes the owner-requested date cell, then runs `backend/scripts/update-policy-company.mjs` to apply the approved company and telephone changes. That step also verifies all other paragraph wording is preserved and refreshes the published text/index. The importer stops on unknown visible content or a mismatch. It records original source SHA-256 hashes and keeps private copies of the original DOCX files in ignored `backend/.local/policy-import/`. Original document binaries and their private metadata are not published as frontend downloads. Review regenerated content before publishing any future revisions.
 
 ## Verification
 

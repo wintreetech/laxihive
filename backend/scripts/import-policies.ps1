@@ -172,3 +172,5 @@ $taskEncoding=New-Object Text.UTF8Encoding($false)
 [IO.File]::WriteAllText((Join-Path $taskOutput 'policies.json'),(ConvertTo-Json -InputObject $taskDocuments -Depth 70),$taskEncoding)
 $taskIndex=@($taskDocuments | Select-Object path,title,sourceFile,sourceSha256,paragraphCount)
 [IO.File]::WriteAllText((Join-Path $taskOutput 'policy-index.json'),(ConvertTo-Json -InputObject $taskIndex -Depth 5),$taskEncoding)
+& node (Join-Path $PSScriptRoot 'update-policy-company.mjs')
+if($LASTEXITCODE -ne 0) { throw 'Company/contact policy update failed' }
